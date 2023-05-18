@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block title %}
+    Load data
+{% endblock title %}
+
+{% block content %}
+    <h1>Load data</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="archivo_csv" required />
+        <button type="submit">Cargar</button>
+    </form>
+{% endblock content %}
