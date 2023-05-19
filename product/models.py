@@ -29,6 +29,9 @@ class Producto(models.Model):
     unidadSat = models.CharField(max_length=50, blank=True, null=True)
     nomUniSat = models.CharField(max_length=100, blank=True, null=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     class Meta:
         verbose_name_plural = "Productos"
         indexes = [

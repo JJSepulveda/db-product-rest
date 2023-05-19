@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "product.apps.ProductConfig",
     "rest_framework",
+    "django_filters",
+    "rest_framework_api_key",
 ]
 
 MIDDLEWARE = [
@@ -132,6 +134,11 @@ REST_FRAMEWORK = {
     # 'DEFAULT_PERMISSION_CLASSES': [
     #     'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     # ]
-    'DEFAULT_PAGINATION_CLASS': 'product.max_limit_pagination.MaxLimitPagination',
-    'PAGE_SIZE': 12
+    "DEFAULT_PAGINATION_CLASS": "product.max_limit_pagination.MaxLimitPagination",
+    "PAGE_SIZE": 12,
+    "DEFAULT_FILTER_BACKENDS": (
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.SearchFilter",
+        "rest_framework.filters.OrderingFilter",
+    ),
 }
