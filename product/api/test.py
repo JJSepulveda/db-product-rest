@@ -42,3 +42,16 @@ class ProductListCreateTestCase(APITestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 0)
+    
+    def test_api_key(self):
+        """Verificar que funciona el API Key"""
+        response = self.client.post(self.url, self.product_data, headers=self.headers)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Producto.objects.count(), 1)
+        self.assertEqual(Producto.objects.get().nombre, self.product_data["nombre"])
+
+    def test_api_key_invalid(self):
+        """ Verificar los permisos de API Key """
+        response = self.client.post(self.url, self.product_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(Producto.objects.count(), 0)
