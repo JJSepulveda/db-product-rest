@@ -25,6 +25,7 @@ class PostHasAPIKey(HasAPIKey):
     """Only allow POST with API Key and allow GET, HEAD, OPTIONS without API Key"""
 
     def has_permission(self, request, view):
+        import pdb; pdb.set_trace()
         if request.method == "POST":
             return super().has_permission(request, view)
         return True
@@ -61,7 +62,27 @@ class ProductListCreate(generics.ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
-    @swagger_auto_schema(tags=["Products"])
+    @swagger_auto_schema(
+        tags=["Products"],
+        manual_parameters=[
+            openapi.Parameter(
+                name="X-Api-Key",
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description="API key for authorization",
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="Successful response",
+                schema=ProductoSerializer(many=True),
+            ),
+            400: "Bad Request",
+            401: "Unauthorized",
+            403: "Forbidden",
+        },
+    )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 

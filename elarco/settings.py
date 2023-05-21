@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
     "rest_framework_api_key",
-    "drf_yasg"
+    "drf_yasg",
 ]
 
 MIDDLEWARE = [
@@ -143,3 +143,5 @@ REST_FRAMEWORK = {
         "rest_framework.filters.OrderingFilter",
     ),
 }
+
+API_KEY_CUSTOM_HEADER = "HTTP_X_API_KEY"
