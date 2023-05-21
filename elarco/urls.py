@@ -17,8 +17,31 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="El Arco API",
+        default_version="1.0.0",
+        description="API for El Arco",
+        # terms_of_service="https://www.google.com/policies/terms/",
+        # contact=openapi.Contact(email="artjsc@outlook.com"),
+        # license=openapi.License(name="BSD License"),
+    ),
+    public=True,
+)
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("product/", include("product.urls", namespace="product")),
-    path("", include("product.api.urls", namespace="product_api")),
+    path(
+        "api/v1/",
+        include(
+            [
+                path("", include("product.api.urls", namespace="product_api")),
+                path("swagger/schema/", schema_view.with_ui("swagger", cache_timeout=0), name="swagger-schema"),
+            ]
+        ),
+    ),
 ]

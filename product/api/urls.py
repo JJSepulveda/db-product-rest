@@ -6,17 +6,17 @@ from . import views
 app_name = views.APP_NAME
 urlpatterns = [
     path(
-        "api/products/",
+        "products/",
         views.ProductListCreate.as_view(),
         name=views.ProductListCreate.name,
     ),
     path(
-        "api/products/<int:pk>/",
+        "products/<int:pk>/",
         views.ProductRetrieveUpdateDestroy.as_view(),
         name=views.ProductRetrieveUpdateDestroy.name,
     ),
     path(
-        "api/products/c/<str:codigo>/",
+        "products/c/<str:codigo>/",
         views.ProductRetrieveUpdateDestroyCode.as_view(),
         name=views.ProductRetrieveUpdateDestroy.name,
     ),

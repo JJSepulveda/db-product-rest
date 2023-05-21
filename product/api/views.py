@@ -10,6 +10,9 @@ from rest_framework.views import APIView
 from rest_framework_api_key.models import APIKey
 from rest_framework.exceptions import PermissionDenied
 
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+
 from product.models import Producto
 
 from .serializers import ProductoSerializer
@@ -54,12 +57,36 @@ class ProductListCreate(generics.ListCreateAPIView):
     ordering_fields = ("nombre", "created_at")
     permission_classes = [PostHasAPIKey]
 
+    @swagger_auto_schema(tags=["Products"])
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=["Products"])
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
 
 class ProductRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = Producto.objects.all()
     serializer_class = ProductoSerializer
     name = "product-detail"
     permission_classes = [RetrieveUpdateDestroyAPIKey]
+
+    @swagger_auto_schema(tags=["Products"], operation_description="Retrieve a product by id")
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=["Products"])
+    def put(self, request, *args, **kwargs):
+        return super().put(request, *args, **kwargs)
+    
+    @swagger_auto_schema(tags=["Products"])
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=["Products"])
+    def delete(self, request, *args, **kwargs):
+        return super().delete(request, *args, **kwargs)
 
 
 class ProductRetrieveUpdateDestroyCode(generics.RetrieveUpdateDestroyAPIView):
@@ -69,10 +96,45 @@ class ProductRetrieveUpdateDestroyCode(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = "codigo"
     permission_classes = [RetrieveUpdateDestroyAPIKey]
 
+    @swagger_auto_schema(tags=["Products"])
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=["Products"])
+    def put(self, request, *args, **kwargs):
+        return super().put(request, *args, **kwargs)
+    
+    @swagger_auto_schema(tags=["Products"])
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=["Products"])
+    def delete(self, request, *args, **kwargs):
+        return super().delete(request, *args, **kwargs)
+
 
 class ApiRoot(generics.GenericAPIView):
     name = "api-root"
+    pagination_class = None
+    filter_backends = None
 
+    @swagger_auto_schema(
+        tags=["Info"],
+        operation_summary="API Root",
+        operation_description="This is the API root view.",
+        responses={
+            200: openapi.Response(
+                description="Successful response",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "products": openapi.Schema(type=openapi.TYPE_STRING),
+                        "show-api-key": openapi.Schema(type=openapi.TYPE_STRING),
+                    },
+                ),
+            )
+        },
+    )
     def get(self, request, *args, **kwargs):
         product_url = reverse(APP_NAME + ":" + ProductListCreate.name)
         absolute_product_url = request.build_absolute_uri(product_url)
@@ -88,12 +150,31 @@ class ApiRoot(generics.GenericAPIView):
 
 class GetApiKey(generics.GenericAPIView):
     name = "show-api-key"
+    pagination_class = None
+    filter_backends = None
 
+    @swagger_auto_schema(
+        tags=["Info"],
+        operation_summary="Get API Key",
+        operation_description="This endpoint returns the API key for development purposes.",
+        responses={
+            200: openapi.Response(
+                description="Successful response",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "api-key": openapi.Schema(type=openapi.TYPE_STRING),
+                        "detail": openapi.Schema(type=openapi.TYPE_STRING),
+                    },
+                ),
+            )
+        },
+    )
     def get(self, request, *args, **kwargs):
         api_key = "yIZKLxfi.aN0B7KGvv33Jrdhg22ZmYp6BLpdOka6D"
         return Response(
             {
                 "api-key": api_key,
-                "detail": "Here is your API Key for development purposes only. will be removed in production."
+                "detail": "Here is your API Key for development purposes only. will be removed in production.",
             }
         )
