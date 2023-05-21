@@ -27,7 +27,7 @@ SECRET_KEY = config("SECRET_KEY", cast=str)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", cast=bool, default=False)
 
-ALLOWED_HOSTS = [".vercel.app", ".now.sh", "localhost"]
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
