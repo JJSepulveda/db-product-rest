@@ -27,7 +27,7 @@ SECRET_KEY = config("SECRET_KEY", cast=str)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", cast=bool, default=False)
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["api.elarco.mx", "localhost"]
 
 
 # Application definition
@@ -148,3 +148,5 @@ REST_FRAMEWORK = {
 }
 
 API_KEY_CUSTOM_HEADER = "HTTP_X_API_KEY"
+
+CSRF_TRUSTED_ORIGINS = ["api.elarco.mx"]
