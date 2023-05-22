@@ -25,7 +25,6 @@ class PostHasAPIKey(HasAPIKey):
     """Only allow POST with API Key and allow GET, HEAD, OPTIONS without API Key"""
 
     def has_permission(self, request, view):
-        import pdb; pdb.set_trace()
         if request.method == "POST":
             return super().has_permission(request, view)
         return True

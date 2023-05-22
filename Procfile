@@ -1,1 +1,1 @@
-web: python manage.py makemigrations && python manage.py migrate && gunicorn eshop.wsgi --log-file -
+web: python manage.py makemigrations && python manage.py migrate && gunicorn elarco.wsgi --log-file -
