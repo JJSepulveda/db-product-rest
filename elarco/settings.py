@@ -148,5 +148,5 @@ REST_FRAMEWORK = {
 }
 
 API_KEY_CUSTOM_HEADER = "HTTP_X_API_KEY"
-
+    
 CSRF_TRUSTED_ORIGINS = ["https://api.elarco.mx"]
