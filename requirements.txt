@@ -8,6 +8,7 @@ coreschema==0.0.4
 coverage==7.2.5
 cssbeautifier==1.14.7
 Django==4.2.1
+django-cors-headers==4.0.0
 django-filter==23.2
 djangorestframework==3.14.0
 djangorestframework-api-key==2.3.0
@@ -31,6 +32,7 @@ packaging==23.1
 pandas==2.0.1
 pathspec==0.11.1
 pluggy==1.0.0
+psycopg2==2.9.6
 pytest==7.3.1
 pytest-cov==4.0.0
 pytest-django==4.5.2
