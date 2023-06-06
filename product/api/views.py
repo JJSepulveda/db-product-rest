@@ -1,4 +1,5 @@
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import filters
@@ -16,7 +17,6 @@ from drf_yasg.utils import swagger_auto_schema
 from product.models import Producto
 
 from .serializers import ProductoSerializer
-
 
 APP_NAME = "product_api"
 
@@ -53,7 +53,7 @@ class ProductListCreate(generics.ListCreateAPIView):
     serializer_class = ProductoSerializer
     name = "product-list"
     filterset_fields = ("nombre",)
-    search_fields = ("^nombre",)
+    search_fields = ("nombre",)
     ordering_fields = ("nombre", "created_at")
     permission_classes = [PostHasAPIKey]
 
