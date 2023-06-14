@@ -53,7 +53,7 @@ class ProductListCreate(generics.ListCreateAPIView):
     serializer_class = ProductoSerializer
     name = "product-list"
     filterset_fields = ("nombre",)
-    search_fields = ("nombre",)
+    search_fields = ("nombre", "codigo")
     ordering_fields = ("nombre", "created_at")
     permission_classes = [PostHasAPIKey]
 
