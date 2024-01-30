@@ -17,40 +17,42 @@ def load_data(request):
     if request.method == 'POST' and request.FILES['archivo_csv']:
         archivo = request.FILES['archivo_csv']
         data_frame = pd.read_csv(archivo, na_values=['NaN', 'N/A', '', 'nan'])
+        # Convertir nombres de columnas a minúsculas
+        data_frame.columns = data_frame.columns.str.lower()
 
         for index, row in data_frame.iterrows():
+            # import pdb; pdb.set_trace()
             try:
                 producto, created = Producto.objects.update_or_create(
                     codigo=row['codigo'],
                     defaults= {
-                        "nombre": None if pd.isnull(row['nombre']) else row['nombre'],
-                        "marca": None if pd.isnull(row['marca']) else row['marca'],
-                        "linea": None if pd.isnull(row['linea']) else row['linea'],
-                        "sublinea": None if pd.isnull(row['sublinea']) else row['sublinea'],
-                        "departamento": None if pd.isnull(row['departamento']) else row['departamento'],
-                        "costo": None if pd.isnull(row['costo']) else row['costo'],
-                        "precio1": None if pd.isnull(row['precio1']) else row['precio1'],
-                        "ptje1": None if pd.isnull(row['ptje1']) else row['ptje1'],
-                        "ptjeReal": None if pd.isnull(row['ptjeReal']) else row['ptjeReal'],
-                        "precioCalculado": None if pd.isnull(row['precioCalculado']) else row['precioCalculado'],
-                        "maximo": None if pd.isnull(row['maximo']) else row['maximo'],
-                        "minimo": None if pd.isnull(row['minimo']) else row['minimo'],
-                        "estatus": None if pd.isnull(row['estatus']) else row['estatus'],
-                        "nombreStatus": None if pd.isnull(row['nombreStatus']) else row['nombreStatus'],
-                        "tipoProd": None if pd.isnull(row['tipoProd']) else row['tipoProd'],
-                        "tipoProdDesc": None if pd.isnull(row['tipoProdDesc']) else row['tipoProdDesc'],
-                        "codigosAlternos": None if pd.isnull(row['codigosAlternos']) else row['codigosAlternos'],
-                        "activo": None if pd.isnull(row['activo']) else row['activo'],
-                        "prov": None if pd.isnull(row['prov']) else row['prov'],
-                        "nombreProveedor": None if pd.isnull(row['nombreProveedor']) else row['nombreProveedor'],
-                        "unidad": None if pd.isnull(row['unidad']) else row['unidad'],
-                        "codigoSat": None if pd.isnull(row['codigoSat']) else row['codigoSat'],
-                        "nomCodSat": None if pd.isnull(row['nomCodSat']) else row['nomCodSat'],
-                        "unidadSat": None if pd.isnull(row['unidadSat']) else row['unidadSat'],
-                        "nomUniSat": None if pd.isnull(row['nomUniSat']) else row['nomUniSat'],
+                        "nombre": row.get('nombre', None),
+                        "marca": row.get('marca', None),
+                        "linea": row.get('linea', None),
+                        "sublinea": row.get('sublinea', None),
+                        "departamento": row.get('departamento', None),
+                        "costo": row.get('costo', None),
+                        "precio1": row.get('precio1', None),
+                        "ptje1": row.get('ptje1', None),
+                        "ptjeReal": row.get('ptjeReal', None),
+                        "precioCalculado": row.get('precioCalculado', None),
+                        "maximo": row.get('maximo', None),
+                        "minimo": row.get('minimo', None),
+                        "estatus": row.get('estatus', None),
+                        "nombreStatus": row.get('nombreStatus', None),
+                        "tipoProd": row.get('tipoProd', None),
+                        "tipoProdDesc": row.get('tipoProdDesc', None),
+                        "codigosAlternos": row.get('codigosAlternos', None),
+                        "activo": row.get('activo', None),
+                        "prov": row.get('prov', None),
+                        "nombreProveedor": row.get('nombreProveedor', None),
+                        "unidad": row.get('unidad', None),
+                        "codigoSat": row.get('codigoSat', None),
+                        "nomCodSat": row.get('nomCodSat', None),
+                        "unidadSat": row.get('unidadSat', None),
+                        "nomUniSat": row.get('nomUniSat', None),
                     }
                 )
-                print(producto, created)
             except IntegrityError:
                 print("Error al insertar el producto: ", row['codigo'])
                 pass

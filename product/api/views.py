@@ -3,7 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import filters
-from django_filters import AllValuesFilter, DateTimeFilter, NumberFilter
+from django_filters import AllValuesFilter, DateTimeFilter, NumberFilter, RangeFilter
 from django_filters.rest_framework import FilterSet
 from rest_framework_api_key.permissions import HasAPIKey
 
@@ -20,6 +20,12 @@ from .serializers import ProductoSerializer
 
 APP_NAME = "product_api"
 
+class ProductoFilter(FilterSet):
+    precio = RangeFilter(field_name="precioCalculado")
+
+    class Meta:
+        model = Producto
+        fields = ['precioCalculado']
 
 class PostHasAPIKey(HasAPIKey):
     """Only allow POST with API Key and allow GET, HEAD, OPTIONS without API Key"""
@@ -56,6 +62,7 @@ class ProductListCreate(generics.ListCreateAPIView):
     search_fields = ("nombre", "codigo")
     ordering_fields = ("nombre", "created_at")
     permission_classes = [PostHasAPIKey]
+    filterset_class = ProductoFilter
 
     @swagger_auto_schema(tags=["Products"])
     def get(self, request, *args, **kwargs):
