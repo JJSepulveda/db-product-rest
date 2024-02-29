@@ -19,6 +19,7 @@ from django.urls import include, path
 
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
+from django.views.generic import TemplateView
 
 from product.views import index
 
@@ -49,4 +50,8 @@ urlpatterns = [
     ),
     path('accounts/', include('django.contrib.auth.urls')),
     # path("", include("account.urls", namespace="account")),
+    path(
+        "robots.txt",
+        TemplateView.as_view(template_name="product/robots.txt", content_type="text/plain"),
+    ),
 ]
