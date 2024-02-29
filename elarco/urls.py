@@ -56,6 +56,6 @@ urlpatterns = [
         "robots.txt",
         TemplateView.as_view(template_name="product/robots.txt", content_type="text/plain"),
     ),
-] 
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
