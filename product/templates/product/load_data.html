@@ -4,10 +4,63 @@
 {% endblock title %}
 
 {% block content %}
-    <h1>Load data</h1>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="file" name="archivo_csv" required />
-        <button type="submit">Cargar</button>
-    </form>
+<div class="row justify-content-center my-5">
+    <div class="col-12 col-sm-6 col-md-5">
+        <header class="my-3">
+            <nav>
+                <span>
+                    <i class="bx bx-user"></i> {{ request.user.username }}
+                </span>
+                <a href="{% url 'logout' %}" class="text-decoration-none float-end">
+                    <i class="bx bx-log-out white"></i> Salir
+                </a>
+            </nav>
+        </header>
+        <div class="card">
+            <div class="card-header">
+                <h1>Cargar datos</h1>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    <small class="text-muted">
+                        * subir archivo csv
+                    </small>
+                    <br />
+                    {% csrf_token %}
+                    <input type="file" name="archivo_csv" required />
+                    <button type="submit">Cargar</button>
+                </form>
+                <!-- Loading element -->
+                <div id="loading-element" style="display: none;">
+                    <i class="bx bx-loader-circle bx-spin"></i> Cargando...
+                    <div
+                        class="alert alert-warning alert-dismissible fade show"
+                        role="alert"
+                    >
+                        No cierre la pestaña hasta que termine de cargar. Puede tardar algunos minutos.
+                    </div>
+                    
+                    <script>
+                        var alertList = document.querySelectorAll(".alert");
+                        alertList.forEach(function (alert) {
+                            new bootstrap.Alert(alert);
+                        });
+                    </script>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const loadingElement = document.getElementById('loading-element');
+    
+        form.addEventListener('submit', function() {
+            // Show loading element when the form is submitted
+            loadingElement.style.display = 'block';
+        });
+    });
+    </script>
 {% endblock content %}

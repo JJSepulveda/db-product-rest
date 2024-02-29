@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "rest_framework_api_key",
     "drf_yasg",
     "corsheaders",
+    "account.apps.AccountConfig"
 ]
 
 MIDDLEWARE = [
