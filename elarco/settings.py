@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     "rest_framework_api_key",
     "drf_yasg",
     "corsheaders",
-    "account.apps.AccountConfig"
+    "account.apps.AccountConfig",
+    "axes"
 ]
 
 MIDDLEWARE = [
@@ -57,6 +58,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "axes.middleware.AxesMiddleware",
 ]
 
 ROOT_URLCONF = "elarco.urls"
@@ -185,3 +187,16 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+# Configuración de Axes
+AXES_FAILURE_LIMIT = 3  # Número de intentos fallidos permitidos antes de bloquear la cuenta
+AXES_LOCK_OUT_AT_FAILURE = True  # Bloquear la cuenta después de alcanzar el límite de intentos fallidos
+AXES_COOLOFF_TIME = 1  # Duración en minutos para bloquear la cuenta (en este ejemplo, 1 minuto)
+
+AUTHENTICATION_BACKENDS = [
+    # AxesStandaloneBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
+    'axes.backends.AxesStandaloneBackend',
+
+    # Django ModelBackend is the default authentication backend.
+    'django.contrib.auth.backends.ModelBackend',
+]
