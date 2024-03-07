@@ -4,7 +4,7 @@ from django.contrib import messages
 
 import pandas as pd
 import numpy as np
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 import time
 
 from django.shortcuts import redirect
@@ -81,44 +81,93 @@ def load_data(request):
 
     return render(request, "product/load_data.html")
 
+def try_convert(row, column, data_type):
+    """
+    Intenta convertir el valor de la columna al tipo de datos especificado.
+    Si hay una excepción, se devuelve None.
+    """
+    try:
+        value = row[column]
+        return data_type(str(value)) if value is not None else None
+    except (ValueError, TypeError, InvalidOperation, Exception):
+        return None
+
 def create_new_products_from_csv(products_code, data_frame):
-    # Actualizar los productos existentes con los nuevos valores del DataFrame
+    # Crear los productos existentes con los nuevos valores del DataFrame
     product_list = []
     for code in products_code:
         row = data_frame[data_frame['codigo'] == code].iloc[0]
 
         # Validar el tipo de dato antes de la asignación
-        product_object = Producto(
-            codigo = code,
-            nombre = str(row['nombre']) if row.get('nombre') is not None else None,
-            marca = str(row['marca']) if row.get('marca') is not None else None,
-            linea = str(row['linea']) if row.get('linea') is not None else None,
-            sublinea = str(row['sublinea']) if row.get('sublinea') is not None else None,
-            departamento = str(row['departamento']) if row.get('departamento') is not None else None,
-            costo = Decimal(str(row['costo'])) if row.get('costo') is not None else None,
-            precio1 = Decimal(str(row['precio1'])) if row.get('precio1') is not None else None,
-            ptje1 = int(row['ptje1']) if row.get('ptje1') is not None else None,
-            ptjeReal = int(row['ptjeReal']) if row.get('ptjeReal') is not None else None,
-            precioCalculado = Decimal(str(row['precioCalculado'])) if row.get('precioCalculado') is not None else None,
-            maximo = int(row['maximo']) if row.get('maximo') is not None else None,
-            minimo = int(row['minimo']) if row.get('minimo') is not None else None,
-            estatus = int(row['estatus']) if row.get('estatus') is not None else None,
-            nombreStatus = str(row['nombreStatus']) if row.get('nombreStatus') is not None else None,
-            tipoProd = int(row['tipoProd']) if row.get('tipoProd') is not None else None,
-            tipoProdDesc = str(row['tipoProdDesc']) if row.get('tipoProdDesc') is not None else None,
-            codigosAlternos = str(row['codigosAlternos']) if row.get('codigosAlternos') is not None else None,
-            activo = bool(row['activo']) if row.get('activo') is not None else None,
-            prov = str(row['prov']) if row.get('prov') is not None else None,
-            nombreProveedor = str(row['nombreProveedor']) if row.get('nombreProveedor') is not None else None,
-            unidad = str(row['unidad']) if row.get('unidad') is not None else None,
-            codigoSat = str(row['codigoSat']) if row.get('codigoSat') is not None else None,
-            nomCodSat = str(row['nomCodSat']) if row.get('nomCodSat') is not None else None,
-            unidadSat = str(row['unidadSat']) if row.get('unidadSat') is not None else None,
-            nomUniSat = str(row['nomUniSat']) if row.get('nomUniSat') is not None else None
-        )
+        try:
+            product_object = Producto(
+                codigo=code,
+                nombre=try_convert(row, 'nombre', str),
+                marca=try_convert(row, 'marca', str),
+                linea=try_convert(row, 'linea', str),
+                sublinea=try_convert(row, 'sublinea', str),
+                departamento=try_convert(row, 'departamento', str),
+                costo=try_convert(row, 'costo', Decimal),
+                precio1=try_convert(row, 'precio1', Decimal),
+                ptje1=try_convert(row, 'ptje1', Decimal),
+                ptjeReal=try_convert(row, 'ptjeReal', Decimal),
+                precioCalculado=try_convert(row, 'precioCalculado', Decimal),
+                maximo=try_convert(row, 'maximo', int),
+                minimo=try_convert(row, 'minimo', int),
+                estatus=try_convert(row, 'estatus', int),
+                nombreStatus=try_convert(row, 'nombreStatus', str),
+                tipoProd=try_convert(row, 'tipoProd', int),
+                tipoProdDesc=try_convert(row, 'tipoProdDesc', str),
+                codigosAlternos=try_convert(row, 'codigosAlternos', str),
+                activo=try_convert(row, 'activo', bool),
+                prov=try_convert(row, 'prov', str),
+                nombreProveedor=try_convert(row, 'nombreProveedor', str),
+                unidad=try_convert(row, 'unidad', str),
+                codigoSat=try_convert(row, 'codigoSat', str),
+                nomCodSat=try_convert(row, 'nomCodSat', str),
+                unidadSat=try_convert(row, 'unidadSat', str),
+                nomUniSat=try_convert(row, 'nomUniSat', str)
+            )
+        except Exception:
+            continue
 
         product_list.append(product_object)
     return product_list
+
+def update_products(codigos_productos, data_frame):
+    productos_existentes = Producto.objects.filter(codigo__in=codigos_productos)
+    # Actualizar los productos existentes con los nuevos valores del DataFrame
+    for producto_existente in productos_existentes:
+        row = data_frame[data_frame['codigo'] == producto_existente.codigo].iloc[0]
+        # Validar el tipo de dato antes de la asignación
+        producto_existente.nombre=try_convert(row, 'nombre', str)
+        producto_existente.marca=try_convert(row, 'marca', str)
+        producto_existente.linea=try_convert(row, 'linea', str)
+        producto_existente.sublinea=try_convert(row, 'sublinea', str)
+        producto_existente.departamento=try_convert(row, 'departamento', str)
+        producto_existente.costo=try_convert(row, 'costo', Decimal)
+        producto_existente.precio1=try_convert(row, 'precio1', Decimal)
+        producto_existente.ptje1=try_convert(row, 'ptje1', Decimal)
+        producto_existente.ptjeReal=try_convert(row, 'ptjeReal', Decimal)
+        producto_existente.precioCalculado=try_convert(row, 'precioCalculado', Decimal)
+        producto_existente.maximo=try_convert(row, 'maximo', int)
+        producto_existente.minimo=try_convert(row, 'minimo', int)
+        producto_existente.estatus=try_convert(row, 'estatus', int)
+        producto_existente.nombreStatus=try_convert(row, 'nombreStatus', str)
+        producto_existente.tipoProd=try_convert(row, 'tipoProd', int)
+        producto_existente.tipoProdDesc=try_convert(row, 'tipoProdDesc', str)
+        producto_existente.codigosAlternos=try_convert(row, 'codigosAlternos', str)
+        producto_existente.activo=try_convert(row, 'activo', bool)
+        producto_existente.prov=try_convert(row, 'prov', str)
+        producto_existente.nombreProveedor=try_convert(row, 'nombreProveedor', str)
+        producto_existente.unidad=try_convert(row, 'unidad', str)
+        producto_existente.codigoSat=try_convert(row, 'codigoSat', str)
+        producto_existente.nomCodSat=try_convert(row, 'nomCodSat', str)
+        producto_existente.unidadSat=try_convert(row, 'unidadSat', str)
+        producto_existente.nomUniSat=try_convert(row, 'nomUniSat', str)
+
+    return productos_existentes
+
 
 @login_required
 def load_data_v2(request):
@@ -136,46 +185,12 @@ def load_data_v2(request):
         data_frame = pd.read_csv(archivo, na_values=['NaN', 'N/A', '', 'nan'])
         # data_frame.columns = data_frame.columns.str.lower()
 
-        # Obtener códigos de productos del DataFrame
-        codigos_productos = data_frame['codigo'].tolist()
-
-        # Filtrar productos existentes en la base de datos por sus códigos
-        productos_existentes = Producto.objects.filter(codigo__in=codigos_productos)
-
         phase1_time = time.time() - start_time
         print(f"Fase 1: {phase1_time} segundos")
 
-        # Actualizar los productos existentes con los nuevos valores del DataFrame
-        for producto_existente in productos_existentes:
-            row = data_frame[data_frame['codigo'] == producto_existente.codigo].iloc[0]
-
-            # Validar el tipo de dato antes de la asignación
-            producto_existente.nombre = str(row['nombre']) if row.get('nombre') is not None else None
-            producto_existente.marca = str(row['marca']) if row.get('marca') is not None else None
-            producto_existente.linea = str(row['linea']) if row.get('linea') is not None else None
-            producto_existente.sublinea = str(row['sublinea']) if row.get('sublinea') is not None else None
-            producto_existente.departamento = str(row['departamento']) if row.get('departamento') is not None else None
-            producto_existente.costo = Decimal(str(row['costo'])) if row.get('costo') is not None else None
-            producto_existente.precio1 = Decimal(str(row['precio1'])) if row.get('precio1') is not None else None
-            producto_existente.ptje1 = int(row['ptje1']) if row.get('ptje1') is not None else None
-            producto_existente.ptjeReal = int(row['ptjeReal']) if row.get('ptjeReal') is not None else None
-            producto_existente.precioCalculado = Decimal(str(row['precioCalculado'])) if row.get('precioCalculado') is not None else None
-            producto_existente.maximo = int(row['maximo']) if row.get('maximo') is not None else None
-            producto_existente.minimo = int(row['minimo']) if row.get('minimo') is not None else None
-            producto_existente.estatus = int(row['estatus']) if row.get('estatus') is not None else None
-            producto_existente.nombreStatus = str(row['nombreStatus']) if row.get('nombreStatus') is not None else None
-            producto_existente.tipoProd = int(row['tipoProd']) if row.get('tipoProd') is not None else None
-            producto_existente.tipoProdDesc = str(row['tipoProdDesc']) if row.get('tipoProdDesc') is not None else None
-            producto_existente.codigosAlternos = str(row['codigosAlternos']) if row.get('codigosAlternos') is not None else None
-            producto_existente.activo = bool(row['activo']) if row.get('activo') is not None else None
-            producto_existente.prov = str(row['prov']) if row.get('prov') is not None else None
-            producto_existente.nombreProveedor = str(row['nombreProveedor']) if row.get('nombreProveedor') is not None else None
-            producto_existente.unidad = str(row['unidad']) if row.get('unidad') is not None else None
-            producto_existente.codigoSat = str(row['codigoSat']) if row.get('codigoSat') is not None else None
-            producto_existente.nomCodSat = str(row['nomCodSat']) if row.get('nomCodSat') is not None else None
-            producto_existente.unidadSat = str(row['unidadSat']) if row.get('unidadSat') is not None else None
-            producto_existente.nomUniSat = str(row['nomUniSat']) if row.get('nomUniSat') is not None else None
-
+        # Obtener códigos de productos del DataFrame que se usaran para cargar los productos existentes y actualizarlos
+        codigos_productos = data_frame['codigo'].tolist()
+        productos_existentes = update_products(codigos_productos, data_frame)
 
         phase2_time = time.time() - start_time
         print(f"Fase 2: {phase2_time} segundos")
@@ -185,7 +200,8 @@ def load_data_v2(request):
         
         ## If is empty you don't need to do de comparation
         if bool(existing_codigos):
-            nuevos_productos = [p for p in codigos_productos if p not in existing_codigos]
+            codigos_de_productos_nuevos = [p for p in codigos_productos if p not in existing_codigos]
+            nuevos_productos = create_new_products_from_csv(codigos_de_productos_nuevos, data_frame)
         else:
             nuevos_productos = create_new_products_from_csv(codigos_productos, data_frame)
 
