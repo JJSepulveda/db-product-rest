@@ -81,6 +81,45 @@ def load_data(request):
 
     return render(request, "product/load_data.html")
 
+def create_new_products_from_csv(products_code, data_frame):
+    # Actualizar los productos existentes con los nuevos valores del DataFrame
+    product_list = []
+    for code in products_code:
+        row = data_frame[data_frame['codigo'] == code].iloc[0]
+
+        # Validar el tipo de dato antes de la asignación
+        product_object = Producto(
+            codigo = code,
+            nombre = str(row['nombre']) if row.get('nombre') is not None else None,
+            marca = str(row['marca']) if row.get('marca') is not None else None,
+            linea = str(row['linea']) if row.get('linea') is not None else None,
+            sublinea = str(row['sublinea']) if row.get('sublinea') is not None else None,
+            departamento = str(row['departamento']) if row.get('departamento') is not None else None,
+            costo = Decimal(str(row['costo'])) if row.get('costo') is not None else None,
+            precio1 = Decimal(str(row['precio1'])) if row.get('precio1') is not None else None,
+            ptje1 = int(row['ptje1']) if row.get('ptje1') is not None else None,
+            ptjeReal = int(row['ptjeReal']) if row.get('ptjeReal') is not None else None,
+            precioCalculado = Decimal(str(row['precioCalculado'])) if row.get('precioCalculado') is not None else None,
+            maximo = int(row['maximo']) if row.get('maximo') is not None else None,
+            minimo = int(row['minimo']) if row.get('minimo') is not None else None,
+            estatus = int(row['estatus']) if row.get('estatus') is not None else None,
+            nombreStatus = str(row['nombreStatus']) if row.get('nombreStatus') is not None else None,
+            tipoProd = int(row['tipoProd']) if row.get('tipoProd') is not None else None,
+            tipoProdDesc = str(row['tipoProdDesc']) if row.get('tipoProdDesc') is not None else None,
+            codigosAlternos = str(row['codigosAlternos']) if row.get('codigosAlternos') is not None else None,
+            activo = bool(row['activo']) if row.get('activo') is not None else None,
+            prov = str(row['prov']) if row.get('prov') is not None else None,
+            nombreProveedor = str(row['nombreProveedor']) if row.get('nombreProveedor') is not None else None,
+            unidad = str(row['unidad']) if row.get('unidad') is not None else None,
+            codigoSat = str(row['codigoSat']) if row.get('codigoSat') is not None else None,
+            nomCodSat = str(row['nomCodSat']) if row.get('nomCodSat') is not None else None,
+            unidadSat = str(row['unidadSat']) if row.get('unidadSat') is not None else None,
+            nomUniSat = str(row['nomUniSat']) if row.get('nomUniSat') is not None else None
+        )
+
+        product_list.append(product_object)
+    return product_list
+
 @login_required
 def load_data_v2(request):
     start_time = time.time()
@@ -95,7 +134,7 @@ def load_data_v2(request):
 
         # Cargar datos del archivo CSV
         data_frame = pd.read_csv(archivo, na_values=['NaN', 'N/A', '', 'nan'])
-        data_frame.columns = data_frame.columns.str.lower()
+        # data_frame.columns = data_frame.columns.str.lower()
 
         # Obtener códigos de productos del DataFrame
         codigos_productos = data_frame['codigo'].tolist()
@@ -110,43 +149,50 @@ def load_data_v2(request):
         for producto_existente in productos_existentes:
             row = data_frame[data_frame['codigo'] == producto_existente.codigo].iloc[0]
 
-            producto_existente.nombre = row.get('nombre', None)
-            producto_existente.marca = row.get('marca', None)
-            producto_existente.linea = row.get('linea', None)
-            producto_existente.sublinea = row.get('sublinea', None)
-            producto_existente.departamento = row.get('departamento', None)
-            producto_existente.costo = row.get('costo', None)
-            producto_existente.precio1 = row.get('precio1', None)
-            producto_existente.ptje1 = row.get('ptje1', None)
-            producto_existente.ptjeReal = row.get('ptjeReal', None)
-            producto_existente.precioCalculado = row.get('precioCalculado', None)
-            producto_existente.maximo = row.get('maximo', None)
-            producto_existente.minimo = row.get('minimo', None)
-            producto_existente.estatus = row.get('estatus', None)
-            producto_existente.nombreStatus = row.get('nombreStatus', None)
-            producto_existente.tipoProd = row.get('tipoProd', None)
-            producto_existente.tipoProdDesc = row.get('tipoProdDesc', None)
-            producto_existente.codigosAlternos = row.get('codigosAlternos', None)
-            producto_existente.activo = row.get('activo', None)
-            producto_existente.prov = row.get('prov', None)
-            producto_existente.nombreProveedor = row.get('nombreProveedor', None)
-            producto_existente.unidad = row.get('unidad', None)
-            producto_existente.codigoSat = row.get('codigoSat', None)
-            producto_existente.nomCodSat = row.get('nomCodSat', None)
-            producto_existente.unidadSat = row.get('unidadSat', None)
-            producto_existente.nomUniSat = row.get('nomUniSat', None)
+            # Validar el tipo de dato antes de la asignación
+            producto_existente.nombre = str(row['nombre']) if row.get('nombre') is not None else None
+            producto_existente.marca = str(row['marca']) if row.get('marca') is not None else None
+            producto_existente.linea = str(row['linea']) if row.get('linea') is not None else None
+            producto_existente.sublinea = str(row['sublinea']) if row.get('sublinea') is not None else None
+            producto_existente.departamento = str(row['departamento']) if row.get('departamento') is not None else None
+            producto_existente.costo = Decimal(str(row['costo'])) if row.get('costo') is not None else None
+            producto_existente.precio1 = Decimal(str(row['precio1'])) if row.get('precio1') is not None else None
+            producto_existente.ptje1 = int(row['ptje1']) if row.get('ptje1') is not None else None
+            producto_existente.ptjeReal = int(row['ptjeReal']) if row.get('ptjeReal') is not None else None
+            producto_existente.precioCalculado = Decimal(str(row['precioCalculado'])) if row.get('precioCalculado') is not None else None
+            producto_existente.maximo = int(row['maximo']) if row.get('maximo') is not None else None
+            producto_existente.minimo = int(row['minimo']) if row.get('minimo') is not None else None
+            producto_existente.estatus = int(row['estatus']) if row.get('estatus') is not None else None
+            producto_existente.nombreStatus = str(row['nombreStatus']) if row.get('nombreStatus') is not None else None
+            producto_existente.tipoProd = int(row['tipoProd']) if row.get('tipoProd') is not None else None
+            producto_existente.tipoProdDesc = str(row['tipoProdDesc']) if row.get('tipoProdDesc') is not None else None
+            producto_existente.codigosAlternos = str(row['codigosAlternos']) if row.get('codigosAlternos') is not None else None
+            producto_existente.activo = bool(row['activo']) if row.get('activo') is not None else None
+            producto_existente.prov = str(row['prov']) if row.get('prov') is not None else None
+            producto_existente.nombreProveedor = str(row['nombreProveedor']) if row.get('nombreProveedor') is not None else None
+            producto_existente.unidad = str(row['unidad']) if row.get('unidad') is not None else None
+            producto_existente.codigoSat = str(row['codigoSat']) if row.get('codigoSat') is not None else None
+            producto_existente.nomCodSat = str(row['nomCodSat']) if row.get('nomCodSat') is not None else None
+            producto_existente.unidadSat = str(row['unidadSat']) if row.get('unidadSat') is not None else None
+            producto_existente.nomUniSat = str(row['nomUniSat']) if row.get('nomUniSat') is not None else None
+
 
         phase2_time = time.time() - start_time
         print(f"Fase 2: {phase2_time} segundos")
 
         # Separate new and existing elements
         existing_codigos = Producto.objects.values_list('codigo', flat=True)
-        nuevos_productos = [p for p in productos_existentes if p.codigo not in existing_codigos]
+        
+        ## If is empty you don't need to do de comparation
+        if bool(existing_codigos):
+            nuevos_productos = [p for p in codigos_productos if p not in existing_codigos]
+        else:
+            nuevos_productos = create_new_products_from_csv(codigos_productos, data_frame)
 
         # Check if there are new elements and show how many new elements are new and how many are loaded
         new_elements_count = len(nuevos_productos)
-        existing_elements_count = len(productos_existentes) - new_elements_count
-        messages.info(request, f'Se encontraron {new_elements_count} elementos nuevos y se actualizaran {existing_elements_count} elementos existentes.')
+        existing_elements_to_update_count = len(productos_existentes) - new_elements_count if len(productos_existentes) >= new_elements_count else 0
+        messages.info(request, f'Se encontraron {new_elements_count} elementos nuevos y se actualizaran {existing_elements_to_update_count} elementos existentes.')
 
         phase3_time = time.time() - start_time
         print(f"Fase 3: {phase3_time} segundos")
