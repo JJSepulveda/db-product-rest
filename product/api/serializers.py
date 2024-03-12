@@ -33,5 +33,6 @@ class ProductoSerializer(serializers.ModelSerializer):
             "nomCodSat",
             "unidadSat",
             "nomUniSat",
+            "existencia",
         ]
         
