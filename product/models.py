@@ -28,6 +28,7 @@ class Producto(models.Model):
     nomCodSat = models.CharField(max_length=200, blank=True, null=True)
     unidadSat = models.CharField(max_length=50, blank=True, null=True)
     nomUniSat = models.CharField(max_length=200, blank=True, null=True)
+    existencia = models.PositiveIntegerField(blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

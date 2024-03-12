@@ -69,6 +69,7 @@ def load_data(request):
                         "nomCodSat": row.get('nomCodSat', None),
                         "unidadSat": row.get('unidadSat', None),
                         "nomUniSat": row.get('nomUniSat', None),
+                        "existencia": row.get('existencia', None),
                     }
                 )
             except IntegrityError:
@@ -97,9 +98,11 @@ def create_new_products_from_csv(products_code, data_frame):
     product_list = []
     for code in products_code:
         row = data_frame[data_frame['codigo'] == code].iloc[0]
-
         # Validar el tipo de dato antes de la asignación
         try:
+            stock = try_convert(row, 'existencia', int)
+            stock = stock if stock else 0
+            existencia = stock if stock >= 0 else 0
             product_object = Producto(
                 codigo=code,
                 nombre=try_convert(row, 'nombre', str),
@@ -126,7 +129,8 @@ def create_new_products_from_csv(products_code, data_frame):
                 codigoSat=try_convert(row, 'codigoSat', str),
                 nomCodSat=try_convert(row, 'nomCodSat', str),
                 unidadSat=try_convert(row, 'unidadSat', str),
-                nomUniSat=try_convert(row, 'nomUniSat', str)
+                nomUniSat=try_convert(row, 'nomUniSat', str),
+                existencia=existencia
             )
         except Exception:
             continue
@@ -139,6 +143,9 @@ def update_products(codigos_productos, data_frame):
     # Actualizar los productos existentes con los nuevos valores del DataFrame
     for producto_existente in productos_existentes:
         row = data_frame[data_frame['codigo'] == producto_existente.codigo].iloc[0]
+        stock = try_convert(row, 'existencia', int)
+        stock = stock if stock else 0
+        existencia = stock if stock >= 0 else 0
         # Validar el tipo de dato antes de la asignación
         producto_existente.nombre=try_convert(row, 'nombre', str)
         producto_existente.marca=try_convert(row, 'marca', str)
@@ -165,6 +172,7 @@ def update_products(codigos_productos, data_frame):
         producto_existente.nomCodSat=try_convert(row, 'nomCodSat', str)
         producto_existente.unidadSat=try_convert(row, 'unidadSat', str)
         producto_existente.nomUniSat=try_convert(row, 'nomUniSat', str)
+        producto_existente.existencia=existencia
 
     return productos_existentes
 
@@ -222,7 +230,7 @@ def load_data_v2(request):
                     "maximo", "minimo", "estatus", "nombreStatus", "tipoProd",
                     "tipoProdDesc", "codigosAlternos", "activo", "prov",
                     "nombreProveedor", "unidad", "codigoSat", "nomCodSat",
-                    "unidadSat", "nomUniSat"
+                    "unidadSat", "nomUniSat", "existencia"
                 ])
             except IntegrityError:
                 print("Error al actualizar los productos.")

@@ -109,6 +109,19 @@ class TuTest(TestCase):
             self.assertEqual(product.nomUniSat, try_convert(data, 'nomUniSat', str))
     
     def test_create_new_product_from_incomplete_csv(self):
+        producto = {
+            "codigo": "AOC14",
+            "nombre": 'ABRAZ OMG CB01  1/4"  4PZ',
+            "marca": "BARNETT",
+            "ptjeReal": 302.2988506,
+            "precioCalculado": "14",
+            "unidad": "PZA",
+            "codigoSat": "27112132",
+            "nomCodSat": "Abrazaderas de fijación",
+            "unidadSat": "XPK",
+            "nomUniSat": "PAQUETE",
+        }
+
         # Obtiene la ruta del directorio actual de la prueba
         current_directory = os.path.dirname(os.path.abspath(__file__))
         
@@ -125,31 +138,15 @@ class TuTest(TestCase):
 
         # Verifica que los productos creados tengan los valores correctos
         for product in product_list:
-            if product.codigo == "AOC14":
-                data = test_data_frame[test_data_frame["codigo"] == "AOC14"].iloc[0]
-                self.assertEqual(product.codigo, str(data["codigo"]))
-                self.assertEqual(product.nombre, str(data["nombre"]))
-                self.assertEqual(product.marca, str(data["marca"]))
-                self.assertEqual(product.linea, str(data["linea"]))
-                self.assertEqual(product.sublinea, str(data["sublinea"]))
-                self.assertEqual(product.departamento, str(data["departamento"]))
-                self.assertEqual(product.costo, Decimal(str(data["costo"])))
-                self.assertEqual(product.precio1, Decimal(str(data["precio1"])))
-                self.assertEqual(product.ptje1, Decimal(str(data["ptje1"])))
-                self.assertEqual(product.ptjeReal, Decimal(str(data["ptjeReal"])))
-                self.assertEqual(product.precioCalculado, Decimal(str(data["precioCalculado"])))
-                self.assertEqual(product.maximo, Decimal(str(data["maximo"])))
-                self.assertEqual(product.minimo, Decimal(str(data["minimo"])))
-                self.assertEqual(product.estatus, int(str(data["estatus"])))
-                self.assertEqual(product.nombreStatus, str(data["nombreStatus"]))
-                self.assertEqual(product.tipoProd, int(str(data["tipoProd"])))
-                self.assertEqual(product.tipoProdDesc, str(data["tipoProdDesc"]))
-                self.assertEqual(product.codigosAlternos, str(data["codigosAlternos"]))
-                self.assertEqual(product.activo, bool(str(data["activo"])))
-                self.assertEqual(product.prov, str(data["prov"]))
-                self.assertEqual(product.nombreProveedor, str(data["nombreProveedor"]))
-                self.assertEqual(product.unidad, str(data["unidad"]))
-                self.assertEqual(product.codigoSat, str(data["codigoSat"]))
-                self.assertEqual(product.nomCodSat, str(data["nomCodSat"]))
-                self.assertEqual(product.unidadSat, str(data["unidadSat"]))
-                self.assertEqual(product.nomUniSat, str(data["nomUniSat"]))
+            if product.codigo == producto['codigo']:
+                self.assertEqual(product.codigo, producto["codigo"])
+                self.assertEqual(product.nombre, producto["nombre"])
+                self.assertEqual(product.marca, producto["marca"])
+                self.assertEqual(product.ptjeReal, Decimal(str(producto["ptjeReal"])))
+                self.assertEqual(product.precioCalculado, Decimal(producto["precioCalculado"]))
+                self.assertEqual(product.unidad, producto["unidad"])
+                self.assertEqual(product.codigoSat, producto["codigoSat"])
+                self.assertEqual(product.nomCodSat, producto["nomCodSat"])
+                self.assertEqual(product.unidadSat, producto["unidadSat"])
+                self.assertEqual(product.nomUniSat, producto["nomUniSat"])
+    
