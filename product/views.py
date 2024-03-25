@@ -11,6 +11,7 @@ from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 
 from .models import Producto
+import logging
 # Create your views here.
 
 
@@ -30,8 +31,13 @@ def load_data(request):
             messages.warning(request, 'El archivo debe ser un archivo CSV.')
             return render(request, "product/load_data.html")
 
-
-        data_frame = pd.read_csv(archivo, na_values=['NaN', 'N/A', '', 'nan'])
+        # If pandas can't load it, also sen the same error
+        try:
+            data_frame = pd.read_csv(archivo, na_values=['NaN', 'N/A', '', 'nan'])
+        except Exception:
+            messages.warning(request, 'El archivo debe ser un archivo CSV.')
+            return render(request, "product/load_data.html")
+        
         # Convertir nombres de columnas a minúsculas
         data_frame.columns = data_frame.columns.str.lower()
 
@@ -139,6 +145,7 @@ def create_new_products_from_csv(products_code, data_frame):
     return product_list
 
 def update_products(codigos_productos, data_frame):
+    """ Retorna una lista de los productos que existen en la base de datos con los nuevos datos actualizados """
     productos_existentes = Producto.objects.filter(codigo__in=codigos_productos)
     # Actualizar los productos existentes con los nuevos valores del DataFrame
     for producto_existente in productos_existentes:
@@ -146,6 +153,7 @@ def update_products(codigos_productos, data_frame):
         stock = try_convert(row, 'existencia', int)
         stock = stock if stock else 0
         existencia = stock if stock >= 0 else 0
+        
         # Validar el tipo de dato antes de la asignación
         producto_existente.nombre=try_convert(row, 'nombre', str)
         producto_existente.marca=try_convert(row, 'marca', str)
@@ -189,19 +197,20 @@ def load_data_v2(request):
             messages.warning(request, 'El archivo debe ser un archivo CSV.')
             return render(request, "product/load_data.html")
 
+        # import pdb; pdb.set_trace()
         # Cargar datos del archivo CSV
         data_frame = pd.read_csv(archivo, na_values=['NaN', 'N/A', '', 'nan'])
         # data_frame.columns = data_frame.columns.str.lower()
 
         phase1_time = time.time() - start_time
-        print(f"Fase 1: {phase1_time} segundos")
+        logging.info(f"Fase 1: {phase1_time} segundos")
 
         # Obtener códigos de productos del DataFrame que se usaran para cargar los productos existentes y actualizarlos
         codigos_productos = data_frame['codigo'].tolist()
         productos_existentes = update_products(codigos_productos, data_frame)
 
         phase2_time = time.time() - start_time
-        print(f"Fase 2: {phase2_time} segundos")
+        logging.info(f"Fase 2: {phase2_time} segundos")
 
         # Separate new and existing elements
         existing_codigos = Producto.objects.values_list('codigo', flat=True)
@@ -215,11 +224,10 @@ def load_data_v2(request):
 
         # Check if there are new elements and show how many new elements are new and how many are loaded
         new_elements_count = len(nuevos_productos)
-        existing_elements_to_update_count = len(productos_existentes) - new_elements_count if len(productos_existentes) >= new_elements_count else 0
-        messages.info(request, f'Se encontraron {new_elements_count} elementos nuevos y se actualizaran {existing_elements_to_update_count} elementos existentes.')
+        messages.info(request, f'Se encontraron {new_elements_count} elementos nuevos y se actualizaran {len(productos_existentes)} elementos existentes.')
 
         phase3_time = time.time() - start_time
-        print(f"Fase 3: {phase3_time} segundos")
+        logging.info(f"Fase 3: {phase3_time} segundos")
 
         # Make bulk update for existing elements
         if productos_existentes:
@@ -239,14 +247,16 @@ def load_data_v2(request):
                 messages.success(request, "Se actualizó correctamente la información de los productos.")
         
         phase4_time = time.time() - start_time
-        print(f"Fase 4: {phase4_time} segundos")
+        logging.info(f"Fase 4: {phase4_time} segundos")
 
         # Make bulk create for new elements
         if nuevos_productos:
             try:
-                Producto.objects.bulk_create(nuevos_productos)
-            except IntegrityError:
-                print("Error al crear nuevos productos.")
+                for i in range(0, len(nuevos_productos), 1000):
+                    Producto.objects.bulk_create(nuevos_productos[i:i+1000], batch_size=1000, ignore_conflicts=True)
+                    logging.debug(f"batch: {i}")
+            except IntegrityError as e:
+                logging.error(e)
                 messages.error(request, "Hubo un error al crear nuevos productos.")
             else:
                 messages.success(request, "Se crearon los nuevo elementos correctamente.")
