@@ -223,14 +223,14 @@ def update_products(codigos_productos, data_frame):
         producto_existente.unidadSat=try_convert(row, 'unidadSat', str)
         producto_existente.nomUniSat=try_convert(row, 'nomUniSat', str)
         producto_existente.existencia=existencia
-        producto_existente.existenciaPiso=stocks['existenciaPiso'],
-        producto_existente.existenciaProd=stocks['existenciaProd'],
-        producto_existente.existenciaTubos=stocks['existenciaTubos'],
-        producto_existente.existenciaTanques=stocks['existenciaTanques'],
-        producto_existente.existenciaDistr=stocks['existenciaDistr'],
-        producto_existente.existenciaMakita=stocks['existenciaMakita'],
-        producto_existente.existenciaStaRosa=stocks['existenciaStaRosa'],
-        producto_existente.existenciaTotal=stocks['existenciaTotal'],
+        producto_existente.existenciaPiso=stocks['existenciaPiso']
+        producto_existente.existenciaProd=stocks['existenciaProd']
+        producto_existente.existenciaTubos=stocks['existenciaTubos']
+        producto_existente.existenciaTanques=stocks['existenciaTanques']
+        producto_existente.existenciaDistr=stocks['existenciaDistr']
+        producto_existente.existenciaMakita=stocks['existenciaMakita']
+        producto_existente.existenciaStaRosa=stocks['existenciaStaRosa']
+        producto_existente.existenciaTotal=stocks['existenciaTotal']
 
     return productos_existentes
 
@@ -290,7 +290,9 @@ def load_data_v2(request):
                     "maximo", "minimo", "estatus", "nombreStatus", "tipoProd",
                     "tipoProdDesc", "codigosAlternos", "activo", "prov",
                     "nombreProveedor", "unidad", "codigoSat", "nomCodSat",
-                    "unidadSat", "nomUniSat", "existencia"
+                    "unidadSat", "nomUniSat", "existencia", "existenciaPiso", "existenciaProd", 
+                    "existenciaTubos", "existenciaTanques", "existenciaDistr", "existenciaMakita", 
+                    "existenciaStaRosa", "existenciaTotal"
                 ], batch_size=1000)
             except IntegrityError:
                 logging.error("Error al actualizar los productos:")
