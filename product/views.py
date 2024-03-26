@@ -20,9 +20,10 @@ def index(request):
     return redirect('product:load_v2')
     # return render(request, "product/index.html")
 
-
+## This function is deprecated
 @login_required
 def load_data(request):
+    """ DEPRECATED """
     if request.method == 'POST' and request.FILES['archivo_csv']:
         archivo = request.FILES['archivo_csv']
 
@@ -98,6 +99,37 @@ def try_convert(row, column, data_type):
         return data_type(str(value)) if value is not None else None
     except (ValueError, TypeError, InvalidOperation, Exception):
         return None
+    
+def get_stock(stock):
+    """ Retorna un valor positivo"""
+    # Si no existe el valor de stock entonces manda 0
+    value = stock if stock else 0
+    # Si el valor de stock es negativo, conviertelo a 0
+    existencia = value if value >= 0 else 0
+    return existencia
+
+def get_stocks(row):
+    existenciaPiso = get_stock(try_convert(row, "existenciaPiso", int))
+    existenciaProd = get_stock(try_convert(row, "existenciaProd", int))
+    existenciaTubos = get_stock(try_convert(row, "existenciaTubos", int))
+    existenciaTanques = get_stock(try_convert(row, "existenciaTanques", int))
+    existenciaDistr = get_stock(try_convert(row, "existenciaDistr", int))
+    existenciaMakita = get_stock(try_convert(row, "existenciaMakita", int))
+    existenciaStaRosa = get_stock(try_convert(row, "existenciaStaRosa", int))
+    existenciaTotal = get_stock(try_convert(row, "existenciaTotal", int))
+    
+    results = {
+        "existenciaPiso": existenciaPiso,
+        "existenciaProd": existenciaProd,
+        "existenciaTubos": existenciaTubos,
+        "existenciaTanques": existenciaTanques,
+        "existenciaDistr": existenciaDistr,
+        "existenciaMakita": existenciaMakita,
+        "existenciaStaRosa": existenciaStaRosa,
+        "existenciaTotal": existenciaTotal,
+    }
+    
+    return results
 
 def create_new_products_from_csv(products_code, data_frame):
     # Crear los productos existentes con los nuevos valores del DataFrame
@@ -107,8 +139,10 @@ def create_new_products_from_csv(products_code, data_frame):
         # Validar el tipo de dato antes de la asignación
         try:
             stock = try_convert(row, 'existencia', int)
-            stock = stock if stock else 0
-            existencia = stock if stock >= 0 else 0
+            ## Get only one stosk for the version 1 of this function
+            existencia = get_stock(stock)
+            # Get the all stocks
+            stocks = get_stocks(row)
             product_object = Producto(
                 codigo=code,
                 nombre=try_convert(row, 'nombre', str),
@@ -136,7 +170,15 @@ def create_new_products_from_csv(products_code, data_frame):
                 nomCodSat=try_convert(row, 'nomCodSat', str),
                 unidadSat=try_convert(row, 'unidadSat', str),
                 nomUniSat=try_convert(row, 'nomUniSat', str),
-                existencia=existencia
+                existencia=existencia,
+                existenciaPiso=stocks['existenciaPiso'],
+                existenciaProd=stocks['existenciaProd'],
+                existenciaTubos=stocks['existenciaTubos'],
+                existenciaTanques=stocks['existenciaTanques'],
+                existenciaDistr=stocks['existenciaDistr'],
+                existenciaMakita=stocks['existenciaMakita'],
+                existenciaStaRosa=stocks['existenciaStaRosa'],
+                existenciaTotal=stocks['existenciaTotal'],
             )
         except Exception:
             continue
@@ -151,8 +193,8 @@ def update_products(codigos_productos, data_frame):
     for producto_existente in productos_existentes:
         row = data_frame[data_frame['codigo'] == producto_existente.codigo].iloc[0]
         stock = try_convert(row, 'existencia', int)
-        stock = stock if stock else 0
-        existencia = stock if stock >= 0 else 0
+        existencia = get_stock(stock)
+        stocks = get_stocks(row)
         
         # Validar el tipo de dato antes de la asignación
         producto_existente.nombre=try_convert(row, 'nombre', str)
@@ -181,13 +223,23 @@ def update_products(codigos_productos, data_frame):
         producto_existente.unidadSat=try_convert(row, 'unidadSat', str)
         producto_existente.nomUniSat=try_convert(row, 'nomUniSat', str)
         producto_existente.existencia=existencia
+        producto_existente.existenciaPiso=stocks['existenciaPiso'],
+        producto_existente.existenciaProd=stocks['existenciaProd'],
+        producto_existente.existenciaTubos=stocks['existenciaTubos'],
+        producto_existente.existenciaTanques=stocks['existenciaTanques'],
+        producto_existente.existenciaDistr=stocks['existenciaDistr'],
+        producto_existente.existenciaMakita=stocks['existenciaMakita'],
+        producto_existente.existenciaStaRosa=stocks['existenciaStaRosa'],
+        producto_existente.existenciaTotal=stocks['existenciaTotal'],
 
     return productos_existentes
-
 
 @login_required
 def load_data_v2(request):
     start_time = time.time()
+    context = {
+        "count": Producto.objects.count()
+    }
 
     if request.method == 'POST' and request.FILES['archivo_csv']:
         archivo = request.FILES['archivo_csv']
@@ -239,9 +291,10 @@ def load_data_v2(request):
                     "tipoProdDesc", "codigosAlternos", "activo", "prov",
                     "nombreProveedor", "unidad", "codigoSat", "nomCodSat",
                     "unidadSat", "nomUniSat", "existencia"
-                ])
+                ], batch_size=1000)
             except IntegrityError:
-                print("Error al actualizar los productos.")
+                logging.error("Error al actualizar los productos:")
+                logging.error(e)
                 messages.error(request, "Hubo un error al actualizar los productos.")
             else:
                 messages.success(request, "Se actualizó correctamente la información de los productos.")
@@ -256,6 +309,7 @@ def load_data_v2(request):
                     Producto.objects.bulk_create(nuevos_productos[i:i+1000], batch_size=1000, ignore_conflicts=True)
                     logging.debug(f"batch: {i}")
             except IntegrityError as e:
+                logging.error("Error al crear los productos: ")
                 logging.error(e)
                 messages.error(request, "Hubo un error al crear nuevos productos.")
             else:
@@ -263,6 +317,6 @@ def load_data_v2(request):
             
         
         phase5_time = time.time() - start_time
-        print(f"Fase 5: {phase5_time} segundos")
+        logging.info(f"Fase 5: {phase5_time} segundos")
 
-    return render(request, "product/load_data.html")
+    return render(request, "product/load_data.html", context=context)

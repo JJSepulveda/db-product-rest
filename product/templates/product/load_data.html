@@ -21,6 +21,9 @@
                 <h1>Cargar datos</h1>
             </div>
             <div class="card-body">
+                {% if count %}
+                    Cantidad de datos actuales: <small>{{ count }}</small>
+                {% endif %}
                 <form method="post" enctype="multipart/form-data">
                     <small class="text-muted">
                         * subir archivo csv
@@ -48,6 +51,40 @@
                     </script>
                     
                 </div>
+            </div>
+        </div>
+        <div class="row my-5">
+            <div class="col">
+                <p>Lista de campos actuales: </p>
+                <ul>
+                    <li>* codigo</li>
+                    <li>* nombre</li>
+                    <li>* marca</li>
+                    <li>* precioCalculado</li>
+                    <li>* codigoSat</li>
+                    <li>* nomCodSat</li>
+                    <li>* nomUniSat</li>
+                    <li>* unidadSat</li>
+                    <li>existencia</li>
+                    <li>existenciaPiso</li>
+                    <li>existenciaProd</li>
+                    <li>existenciaTubos</li>
+                    <li>existenciaTanques</li>
+                    <li>existenciaDistr</li>
+                    <li>existenciaMakita</li>
+                    <li>existenciaStaRosa</li>
+                    <li>existenciaTotal</li>
+                    <li>codigosAlternos</li>
+                </ul>
+                <small>
+                    <em>
+                        * Campos obligatorios 
+                    </em>
+                    <br>
+                    <em>
+                        Los campos no obligatorios se pueden omitir
+                    </em>
+                </small>
             </div>
         </div>
     </div>
