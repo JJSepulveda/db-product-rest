@@ -16,7 +16,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 from product.models import Producto
 
-from .serializers import ProductoSerializer
+from .serializers import ProductoSerializer, ProductoSerializerV2
 
 APP_NAME = "product_api"
 
@@ -205,3 +205,41 @@ class GetApiKey(generics.GenericAPIView):
                 "detail": "Here is your API Key for development purposes only. will be removed in production.",
             }
         )
+    
+class ProductListCreateV2(generics.ListCreateAPIView):
+    queryset = Producto.objects.all()
+    serializer_class = ProductoSerializerV2
+    name = "product-list"
+    filterset_fields = ("nombre",)
+    search_fields = ("nombre", "codigo")
+    ordering_fields = ("nombre", "created_at")
+    permission_classes = [PostHasAPIKey]
+    filterset_class = ProductoFilter
+
+    @swagger_auto_schema(tags=["Products"])
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        tags=["Products"],
+        manual_parameters=[
+            openapi.Parameter(
+                name="X-Api-Key",
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description="API key for authorization",
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="Successful response",
+                schema=ProductoSerializer(many=True),
+            ),
+            400: "Bad Request",
+            401: "Unauthorized",
+            403: "Forbidden",
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)

@@ -11,6 +11,11 @@ urlpatterns = [
         name=views.ProductListCreate.name,
     ),
     path(
+        "v2/products/",
+        views.ProductListCreateV2.as_view(),
+        name=views.ProductListCreate.name,
+    ),
+    path(
         "products/<int:pk>/",
         views.ProductRetrieveUpdateDestroy.as_view(),
         name=views.ProductRetrieveUpdateDestroy.name,

@@ -50,6 +50,14 @@ urlpatterns = [
             ]
         ),
     ),
+    path(
+        "api/v2/",
+        include(
+            [
+                path("", include("product.api.urlsv2", namespace="product_api_v2")),
+            ]
+        ),
+    ),
     path('accounts/', include('django.contrib.auth.urls')),
     # path("", include("account.urls", namespace="account")),
     path(

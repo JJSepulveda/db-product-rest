@@ -36,3 +36,28 @@ class ProductoSerializer(serializers.ModelSerializer):
             "existencia",
         ]
         
+class ProductoSerializerV2(serializers.ModelSerializer):
+    class Meta:
+        model = Producto
+        fields = [
+            "id", 
+            "codigo",
+            "nombre",
+            "marca",
+            "precioCalculado",
+            "codigoSat",
+            "nomCodSat",
+            "unidadSat",
+            "nomUniSat",
+            "existencia",
+            "existenciaPiso",
+            "existenciaProd",
+            "existenciaTubos",
+            "existenciaTanques",
+            "existenciaDistr",
+            "existenciaMakita",
+            "existenciaStaRosa",
+            "existenciaTotal",
+            "codigosAlternos",
+        ]
+        
