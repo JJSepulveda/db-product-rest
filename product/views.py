@@ -17,7 +17,7 @@ import logging
 
 @login_required
 def index(request):
-    return redirect('product:load_v2')
+    return redirect('product:load_v3')
     # return render(request, "product/index.html")
 
 ## This function is deprecated
@@ -323,6 +323,16 @@ def load_data_v2(request):
 
     return render(request, "product/load_data.html", context=context)
 
+
+@login_required
+def load_data_v3(request):
+    context = {
+        "count": Producto.objects.count()
+    }
+    return render(request, "product/load_data_api.html", context=context)
+
+
+
 from django.http import JsonResponse
 
 @login_required
@@ -365,7 +375,6 @@ def load_data_api(request):
         # Check if there are new elements and show how many new elements are new and how many are loaded
         new_elements_count = len(nuevos_productos)
         logging.info(f'Se encontraron {new_elements_count} elementos nuevos y se actualizaran {len(productos_existentes)} elementos existentes.')
-        response_data['message'] = f'Se encontraron {new_elements_count} elementos nuevos y se actualizaran {len(productos_existentes)} elementos existentes.'
 
         phase3_time = time.time() - start_time
         logging.info(f"Fase 3: {phase3_time} segundos")
@@ -404,12 +413,14 @@ def load_data_api(request):
             except IntegrityError as e:
                 logging.error("Error al crear los productos: ")
                 logging.error(e)
-                response_data['create'] = 'Hubo un error al crear nuevos productos.'
+                response_data['message'] = 'Hubo un error al crear nuevos productos.'
+                response_data['create'] = 'error'
                 return JsonResponse(response_data, status=500)
             else:
                 response_data['create'] = 'Se crearon los nuevo elementos correctamente.'
+
+        response_data['message'] = f'Se crearon {new_elements_count} elementos nuevos y se actualizaron {len(productos_existentes)} elementos.'
             
-        
         phase5_time = time.time() - start_time
         logging.info(f"Fase 5: {phase5_time} segundos")
     

@@ -1,0 +1,208 @@
+{% extends "layout.html" %}
+{% block title %}
+    Load data
+{% endblock title %}
+{% block header_custom %}
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<style>
+    [x-cloak] { display: none !important; }
+</style>
+{% endblock header_custom %}
+{% block content %}
+<div class="row justify-content-center my-5">
+    <div class="col-12 col-sm-7 col-md-8">
+        <header class="my-3">
+            <nav>
+                <span>
+                    <i class="bx bx-user"></i> {{ request.user.username }}
+                </span>
+                <a href="{% url 'logout' %}" class="text-decoration-none float-end">
+                    <i class="bx bx-log-out white"></i> Salir
+                </a>
+            </nav>
+        </header>
+        <div class="card" x-data="loadCsv">
+            <div class="card-header">
+                <h1>Cargar datos</h1>
+            </div>
+            <div class="card-body">
+                <div
+                    class="alert alert-success alert-dismissible fade show"
+                    role="alert" 
+                    x-show="isFinish"
+                    x-cloack
+                    x-transition>
+                    Se cargaron los nuevos elementos
+                </div>
+                <div id="loading-element" x-cloak x-show="isLoading" x-transition>
+                    <i class="bx bx-loader-circle bx-spin"></i> Cargando...
+                    <span>
+                        <span x-text="progress"></span>%
+                    </span>
+                    <div
+                        class="alert alert-warning alert-dismissible fade show"
+                        role="alert" >
+                        No cierre la pestaña hasta que termine de cargar. Puede tardar algunos minutos.
+                    </div>
+                </div>
+                {% if count %}
+                    <span>
+                        Cantidad de datos actuales: <small>{{ count }}</small>
+                    </span>
+                    <br />
+                {% endif %}
+                <div>
+                    <small class="text-muted">
+                        * subir archivo csv
+                    </small>
+                    <br />
+                    <input type="file" id="archivo-csv" required />
+                    <button type="button" class="btn btn-primary btn-lg my-3 float-end" @click="loadData()">Actualizar</button>
+                </div>
+                <!-- Loading element -->
+                <template x-for="value in notifications">
+                    <div>
+                        <small class="text-info">
+                            <i class="bx bx-info-circle"></i> <em> <span x-text="value"></span> </em>
+                        </small>
+                    </div>
+                </template>
+            </div>
+        </div>
+        <div class="row my-5">
+            <div class="col">
+                <p>Lista de campos actuales: </p>
+                <ul>
+                    <li>* codigo</li>
+                    <li>* nombre</li>
+                    <li>* marca</li>
+                    <li>* precioCalculado</li>
+                    <li>* codigoSat</li>
+                    <li>* nomCodSat</li>
+                    <li>* nomUniSat</li>
+                    <li>* unidadSat</li>
+                    <li>existencia</li>
+                    <li>existenciaPiso</li>
+                    <li>existenciaProd</li>
+                    <li>existenciaTubos</li>
+                    <li>existenciaTanques</li>
+                    <li>existenciaDistr</li>
+                    <li>existenciaMakita</li>
+                    <li>existenciaStaRosa</li>
+                    <li>existenciaTotal</li>
+                    <li>codigosAlternos</li>
+                </ul>
+                <small>
+                    <em>
+                        * Campos obligatorios 
+                    </em>
+                    <br>
+                    <em>
+                        Los campos no obligatorios se pueden omitir
+                    </em>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+    const url = "{% url 'product:load_api' %}"
+    // Función para cargar el archivo CSV
+    
+    // Seleccionar el input del archivo
+    const inputArchivo = document.getElementById("archivo-csv");
+    const AMOUNT_OF_SLICES = 6
+
+    // Agregar un evento al input para cargar el archivo
+    inputArchivo.addEventListener("change", function() {
+        
+    });
+
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('loadCsv', () => ({
+            isLoading: false,
+            isError: false,
+            isFinish: false,
+            notifications: [],
+            counter: 0,
+            progress: 0,
+            async loadData(){
+                this.isLoading = true;
+                this.counter = 0;
+                this.notifications = [];
+                this.isError = false;
+                this.isFinish = false;
+                const archivo = inputArchivo.files[0];
+                await this.cargarCSV(archivo);
+            },
+            async cargarCSV(archivo) {
+                const self = this;
+
+                // Convertir el archivo a una cadena
+                const reader = new FileReader();
+                reader.readAsText(archivo);
+
+                // Leer el contenido del archivo
+                reader.onload = async function() {
+                    const contenido = reader.result;
+
+                    // Dividir el contenido en líneas
+                    const lineas = contenido.split("\n");
+                    const header = lineas.shift();
+
+                    // Dividir las líneas en 6 partes iguales
+                    const partes = [];
+                    console.log("Tamaño: ")
+                    console.log(lineas.length)
+                    numberOfParts = Math.ceil(lineas.length/AMOUNT_OF_SLICES)
+                    console.log(numberOfParts)
+                    for (let i = 0; i < lineas.length; i += numberOfParts) {
+                        let slice = lineas.slice(i, i + numberOfParts)
+                        slice.unshift(header)
+                        partes.push(slice)
+                    }
+
+                    // Descargar las 4 partes como archivos CSV
+                    for (let i = 0; i < partes.length; i++) {
+                        const nombreArchivo = `parte-${i + 1}.csv`;
+                        const contenidoCSV = partes[i].join("\n");
+                        const archivoBlob = new Blob([contenidoCSV], { type: 'text/csv' });
+                        const formData = new FormData();
+                        formData.append("archivo_csv", archivoBlob, `parte-${i + 1}.csv`);
+                        
+                        try {
+                            const response = await axios.post(
+                                url, formData, { 
+                                    headers: {
+                                        'X-CSRFToken': getCookie('csrftoken'),
+                                        'Content-Type': 'multipart/form-data',
+                                    }
+                                }
+                            );
+                            
+                            self.notifications.push(response.data.message);
+                            self.counter += 1;
+                            self.progress = (self.counter / AMOUNT_OF_SLICES) * 100;
+                            self.progress = self.progress.toFixed(2);
+                            if (self.counter >= AMOUNT_OF_SLICES) {
+                                self.isLoading = false;
+                                self.isFinish = true;
+                            }
+                        } catch (error) {
+                            console.error('Error al cargar el archivo:', error);
+                            self.isError = true;
+                            self.notifications.push(error)
+                        }
+                    }
+                };
+            }
+        }));
+    });
+</script>
+{% endblock content %}
