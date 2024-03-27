@@ -31,10 +31,10 @@
                     role="alert" 
                     x-show="isFinish"
                     x-cloack
-                    x-transition>
+                    x-transition.duration.500ms>
                     Se cargaron los nuevos elementos
                 </div>
-                <div id="loading-element" x-cloak x-show="isLoading" x-transition>
+                <div id="loading-element" x-cloak x-show="isLoading" x-transition.duration.500ms>
                     <i class="bx bx-loader-circle bx-spin"></i> Cargando...
                     <span>
                         <span x-text="progress"></span>%
@@ -60,6 +60,9 @@
                     <button type="button" class="btn btn-primary btn-lg my-3 float-end" @click="loadData()">Actualizar</button>
                 </div>
                 <!-- Loading element -->
+                <div x-show="dataAmount > 0" x-cloak x-transition.duration.500ms >
+                    <small x-text="`Cantidad de datos a cargar: ${dataAmount}`"></small>
+                </div>
                 <template x-for="value in notifications">
                     <div>
                         <small class="text-info">
@@ -112,12 +115,30 @@
         const parts = value.split(`; ${name}=`);
         if (parts.length === 2) return parts.pop().split(';').shift();
     }
+    function chooseSlices(length){
+        let amount = 1;
+        if (length <= 1000){
+            amount = 1;
+        }
+        else if(length <= 2000){
+            amount = 2;
+        }
+        else if(length <= 5000){
+            amount = 5;
+        }
+        else {
+            amount = 10;
+        }
+
+        return amount;
+
+    }
     const url = "{% url 'product:load_api' %}"
     // Función para cargar el archivo CSV
     
     // Seleccionar el input del archivo
     const inputArchivo = document.getElementById("archivo-csv");
-    const AMOUNT_OF_SLICES = 6
+    let AMOUNT_OF_SLICES = 6
 
     // Agregar un evento al input para cargar el archivo
     inputArchivo.addEventListener("change", function() {
@@ -132,6 +153,7 @@
             notifications: [],
             counter: 0,
             progress: 0,
+            dataAmount: 0,
             async loadData(){
                 this.isLoading = true;
                 this.counter = 0;
@@ -158,10 +180,9 @@
 
                     // Dividir las líneas en 6 partes iguales
                     const partes = [];
-                    console.log("Tamaño: ")
-                    console.log(lineas.length)
+                    self.dataAmount = lineas.length;
+                    AMOUNT_OF_SLICES = chooseSlices(lineas.length)
                     numberOfParts = Math.ceil(lineas.length/AMOUNT_OF_SLICES)
-                    console.log(numberOfParts)
                     for (let i = 0; i < lineas.length; i += numberOfParts) {
                         let slice = lineas.slice(i, i + numberOfParts)
                         slice.unshift(header)
