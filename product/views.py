@@ -323,21 +323,19 @@ def load_data_v2(request):
 
     return render(request, "product/load_data.html", context=context)
 
+from django.http import JsonResponse
 
 @login_required
-def load_data_v2(request):
+def load_data_api(request):
     start_time = time.time()
-    context = {
-        "count": Producto.objects.count()
-    }
-
-    if request.method == 'POST' and request.FILES['archivo_csv']:
+    response_data = {}  # Inicializar el diccionario para almacenar los datos de respuesta
+    if request.method == 'POST' and request.FILES.get('archivo_csv'):
         archivo = request.FILES['archivo_csv']
 
         # Verificar si el archivo subido tiene una extensión CSV
         if not archivo.name.endswith('.csv'):
-            messages.warning(request, 'El archivo debe ser un archivo CSV.')
-            return render(request, "product/load_data.html")
+            response_data['error'] = 'El archivo debe ser un archivo CSV.'
+            return JsonResponse(response_data, status=400)
 
         # import pdb; pdb.set_trace()
         # Cargar datos del archivo CSV
@@ -366,7 +364,8 @@ def load_data_v2(request):
 
         # Check if there are new elements and show how many new elements are new and how many are loaded
         new_elements_count = len(nuevos_productos)
-        messages.info(request, f'Se encontraron {new_elements_count} elementos nuevos y se actualizaran {len(productos_existentes)} elementos existentes.')
+        logging.info(f'Se encontraron {new_elements_count} elementos nuevos y se actualizaran {len(productos_existentes)} elementos existentes.')
+        response_data['message'] = f'Se encontraron {new_elements_count} elementos nuevos y se actualizaran {len(productos_existentes)} elementos existentes.'
 
         phase3_time = time.time() - start_time
         logging.info(f"Fase 3: {phase3_time} segundos")
@@ -387,9 +386,11 @@ def load_data_v2(request):
             except IntegrityError:
                 logging.error("Error al actualizar los productos:")
                 logging.error(e)
-                messages.error(request, "Hubo un error al actualizar los productos.")
+                response_data['message'] = 'Hubo un error al actualizar los productos.'
+                response_data['update'] = 'error'
+                return JsonResponse(response_data, status=500)
             else:
-                messages.success(request, "Se actualizó correctamente la información de los productos.")
+                response_data['update'] = 'Se actualizó correctamente la información de los productos.'
         
         phase4_time = time.time() - start_time
         logging.info(f"Fase 4: {phase4_time} segundos")
@@ -403,12 +404,13 @@ def load_data_v2(request):
             except IntegrityError as e:
                 logging.error("Error al crear los productos: ")
                 logging.error(e)
-                messages.error(request, "Hubo un error al crear nuevos productos.")
+                response_data['create'] = 'Hubo un error al crear nuevos productos.'
+                return JsonResponse(response_data, status=500)
             else:
-                messages.success(request, "Se crearon los nuevo elementos correctamente.")
+                response_data['create'] = 'Se crearon los nuevo elementos correctamente.'
             
         
         phase5_time = time.time() - start_time
         logging.info(f"Fase 5: {phase5_time} segundos")
-
-    return render(request, "product/load_data.html", context=context)
+    
+    return JsonResponse(response_data)
