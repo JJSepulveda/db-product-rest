@@ -19,6 +19,7 @@
         <div class="card">
             <div class="card-header">
                 <h1>Cargar datos</h1>
+                <input type="file" id="archivo-csv" />
             </div>
             <div class="card-body">
                 {% if count %}
@@ -49,7 +50,6 @@
                             new bootstrap.Alert(alert);
                         });
                     </script>
-                    
                 </div>
             </div>
         </div>
@@ -99,5 +99,55 @@
             loadingElement.style.display = 'block';
         });
     });
-    </script>
+</script>
+<script>
+    // Función para cargar el archivo CSV
+    function cargarCSV(archivo) {
+        // Convertir el archivo a una cadena
+        const reader = new FileReader();
+        reader.readAsText(archivo);
+
+        // Leer el contenido del archivo
+        reader.onload = function() {
+            const contenido = reader.result;
+
+            // Dividir el contenido en líneas
+            const lineas = contenido.split("\n");
+            const header = lineas.shift();
+
+            // Dividir las líneas en 4 partes iguales
+            const partes = [];
+            console.log("Tamaño: ")
+            console.log(lineas.length)
+            numberOfParts = Math.ceil(lineas.length/6)
+            console.log(numberOfParts)
+            for (let i = 0; i < lineas.length; i += numberOfParts) {
+                let slice = lineas.slice(i, i + numberOfParts)
+                slice.unshift(header)
+                partes.push(slice)
+                console.log(partes)
+            }
+
+            // Descargar las 4 partes como archivos CSV
+            for (let i = 0; i < partes.length; i++) {
+                const nombreArchivo = `parte-${i + 1}.csv`;
+                const contenidoCSV = partes[i].join("\n");
+
+                // Crear un enlace para descargar el archivo
+                const enlace = document.createElement("a");
+                enlace.href = "data:text/csv;charset=utf-8," + encodeURIComponent(contenidoCSV);
+                enlace.download = nombreArchivo;
+                enlace.click();
+            }
+        };
+    }
+    // Seleccionar el input del archivo
+    const inputArchivo = document.getElementById("archivo-csv");
+
+    // Agregar un evento al input para cargar el archivo
+    inputArchivo.addEventListener("change", function() {
+        const archivo = inputArchivo.files[0];
+        cargarCSV(archivo);
+    });
+</script>
 {% endblock content %}

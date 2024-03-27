@@ -322,3 +322,93 @@ def load_data_v2(request):
         logging.info(f"Fase 5: {phase5_time} segundos")
 
     return render(request, "product/load_data.html", context=context)
+
+
+@login_required
+def load_data_v2(request):
+    start_time = time.time()
+    context = {
+        "count": Producto.objects.count()
+    }
+
+    if request.method == 'POST' and request.FILES['archivo_csv']:
+        archivo = request.FILES['archivo_csv']
+
+        # Verificar si el archivo subido tiene una extensión CSV
+        if not archivo.name.endswith('.csv'):
+            messages.warning(request, 'El archivo debe ser un archivo CSV.')
+            return render(request, "product/load_data.html")
+
+        # import pdb; pdb.set_trace()
+        # Cargar datos del archivo CSV
+        data_frame = pd.read_csv(archivo, na_values=['NaN', 'N/A', '', 'nan'])
+        # data_frame.columns = data_frame.columns.str.lower()
+
+        phase1_time = time.time() - start_time
+        logging.info(f"Fase 1: {phase1_time} segundos")
+
+        # Obtener códigos de productos del DataFrame que se usaran para cargar los productos existentes y actualizarlos
+        codigos_productos = data_frame['codigo'].tolist()
+        productos_existentes = update_products(codigos_productos, data_frame)
+
+        phase2_time = time.time() - start_time
+        logging.info(f"Fase 2: {phase2_time} segundos")
+
+        # Separate new and existing elements
+        existing_codigos = Producto.objects.values_list('codigo', flat=True)
+        
+        ## If is empty you don't need to do de comparation
+        if bool(existing_codigos):
+            codigos_de_productos_nuevos = [p for p in codigos_productos if p not in existing_codigos]
+            nuevos_productos = create_new_products_from_csv(codigos_de_productos_nuevos, data_frame)
+        else:
+            nuevos_productos = create_new_products_from_csv(codigos_productos, data_frame)
+
+        # Check if there are new elements and show how many new elements are new and how many are loaded
+        new_elements_count = len(nuevos_productos)
+        messages.info(request, f'Se encontraron {new_elements_count} elementos nuevos y se actualizaran {len(productos_existentes)} elementos existentes.')
+
+        phase3_time = time.time() - start_time
+        logging.info(f"Fase 3: {phase3_time} segundos")
+
+        # Make bulk update for existing elements
+        if productos_existentes:
+            try:
+                Producto.objects.bulk_update(productos_existentes, fields=[
+                    "nombre", "marca", "linea", "sublinea", "departamento",
+                    "costo", "precio1", "ptje1", "ptjeReal", "precioCalculado",
+                    "maximo", "minimo", "estatus", "nombreStatus", "tipoProd",
+                    "tipoProdDesc", "codigosAlternos", "activo", "prov",
+                    "nombreProveedor", "unidad", "codigoSat", "nomCodSat",
+                    "unidadSat", "nomUniSat", "existencia", "existenciaPiso", "existenciaProd", 
+                    "existenciaTubos", "existenciaTanques", "existenciaDistr", "existenciaMakita", 
+                    "existenciaStaRosa", "existenciaTotal"
+                ], batch_size=1000)
+            except IntegrityError:
+                logging.error("Error al actualizar los productos:")
+                logging.error(e)
+                messages.error(request, "Hubo un error al actualizar los productos.")
+            else:
+                messages.success(request, "Se actualizó correctamente la información de los productos.")
+        
+        phase4_time = time.time() - start_time
+        logging.info(f"Fase 4: {phase4_time} segundos")
+
+        # Make bulk create for new elements
+        if nuevos_productos:
+            try:
+                for i in range(0, len(nuevos_productos), 1000):
+                    Producto.objects.bulk_create(nuevos_productos[i:i+1000], batch_size=1000, ignore_conflicts=True)
+                    logging.debug(f"batch: {i}")
+            except IntegrityError as e:
+                logging.error("Error al crear los productos: ")
+                logging.error(e)
+                messages.error(request, "Hubo un error al crear nuevos productos.")
+            else:
+                messages.success(request, "Se crearon los nuevo elementos correctamente.")
+            
+        
+        phase5_time = time.time() - start_time
+        logging.info(f"Fase 5: {phase5_time} segundos")
+
+    return render(request, "product/load_data.html", context=context)
