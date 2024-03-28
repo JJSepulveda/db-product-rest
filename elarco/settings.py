@@ -174,6 +174,7 @@ API_KEY_CUSTOM_HEADER = "HTTP_X_API_KEY"
 CSRF_TRUSTED_ORIGINS = [
     "https://api.elarco.mx",
     "http://localhost:8000",
+    "http://localhost:8080",
     "http://127.0.0.1:8000",
     "https://yeiyeh.pythonanywhere.com",
 ]
@@ -182,6 +183,7 @@ CSRF_TRUSTED_ORIGINS = [
 CORS_ALLOWED_ORIGINS = [
     "https://api.elarco.mx",
     "http://localhost:8000",
+    "http://localhost:8080",
     "http://127.0.0.1:8000",
     "https://yeiyeh.pythonanywhere.com",
 ]

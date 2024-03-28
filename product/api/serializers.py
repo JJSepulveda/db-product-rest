@@ -6,8 +6,8 @@ class ProductoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Producto
         fields = [
-            "id", 
-            "codigo", 
+            "id",
+            "codigo",
             "nombre",
             "marca",
             "linea",
@@ -35,12 +35,14 @@ class ProductoSerializer(serializers.ModelSerializer):
             "nomUniSat",
             "existencia",
         ]
-        
+
+
 class ProductoSerializerV2(serializers.ModelSerializer):
+    warehouses = serializers.SerializerMethodField()
     class Meta:
         model = Producto
         fields = [
-            "id", 
+            "id",
             "codigo",
             "nombre",
             "marca",
@@ -49,6 +51,11 @@ class ProductoSerializerV2(serializers.ModelSerializer):
             "nomCodSat",
             "unidadSat",
             "nomUniSat",
+            "warehouses",
+        ]
+
+    def get_warehouses(self, obj):
+        warehouse_fields = [
             "existencia",
             "existenciaPiso",
             "existenciaProd",
@@ -58,6 +65,6 @@ class ProductoSerializerV2(serializers.ModelSerializer):
             "existenciaMakita",
             "existenciaStaRosa",
             "existenciaTotal",
-            "codigosAlternos",
         ]
-        
+        warehouses_data = {field: getattr(obj, field) for field in warehouse_fields}
+        return warehouses_data
