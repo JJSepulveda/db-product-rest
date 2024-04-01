@@ -20,12 +20,14 @@ from .serializers import ProductoSerializer, ProductoSerializerV2
 
 APP_NAME = "product_api"
 
+
 class ProductoFilter(FilterSet):
     precio = RangeFilter(field_name="precioCalculado")
 
     class Meta:
         model = Producto
-        fields = ['precioCalculado']
+        fields = ["precioCalculado"]
+
 
 class PostHasAPIKey(HasAPIKey):
     """Only allow POST with API Key and allow GET, HEAD, OPTIONS without API Key"""
@@ -99,14 +101,16 @@ class ProductRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     name = "product-detail"
     permission_classes = [RetrieveUpdateDestroyAPIKey]
 
-    @swagger_auto_schema(tags=["Products"], operation_description="Retrieve a product by id")
+    @swagger_auto_schema(
+        tags=["Products"], operation_description="Retrieve a product by id"
+    )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
     @swagger_auto_schema(tags=["Products"])
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
-    
+
     @swagger_auto_schema(tags=["Products"])
     def patch(self, request, *args, **kwargs):
         return super().patch(request, *args, **kwargs)
@@ -130,7 +134,7 @@ class ProductRetrieveUpdateDestroyCode(generics.RetrieveUpdateDestroyAPIView):
     @swagger_auto_schema(tags=["Products"])
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
-    
+
     @swagger_auto_schema(tags=["Products"])
     def patch(self, request, *args, **kwargs):
         return super().patch(request, *args, **kwargs)
@@ -205,7 +209,9 @@ class GetApiKey(generics.GenericAPIView):
                 "detail": "Here is your API Key for development purposes only. will be removed in production.",
             }
         )
-    
+
+
+## PRODUCRT APIS VERSION 2
 class ProductListCreateV2(generics.ListCreateAPIView):
     queryset = Producto.objects.all()
     serializer_class = ProductoSerializerV2
@@ -234,7 +240,7 @@ class ProductListCreateV2(generics.ListCreateAPIView):
         responses={
             200: openapi.Response(
                 description="Successful response",
-                schema=ProductoSerializer(many=True),
+                schema=ProductoSerializerV2(many=True),
             ),
             400: "Bad Request",
             401: "Unauthorized",
@@ -243,3 +249,52 @@ class ProductListCreateV2(generics.ListCreateAPIView):
     )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
+
+
+class ProductRetrieveUpdateDestroyV2(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Producto.objects.all()
+    serializer_class = ProductoSerializerV2
+    name = "product_detail_v2"
+    permission_classes = [RetrieveUpdateDestroyAPIKey]
+
+    @swagger_auto_schema(
+        tags=["Products"], operation_description="Retrieve a product by id"
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=["Products"])
+    def put(self, request, *args, **kwargs):
+        return super().put(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=["Products"])
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=["Products"])
+    def delete(self, request, *args, **kwargs):
+        return super().delete(request, *args, **kwargs)
+
+
+class ProductRetrieveUpdateDestroyCodeV2(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Producto.objects.all()
+    serializer_class = ProductoSerializerV2
+    name = "product_detail_v2"
+    lookup_field = "codigo"
+    permission_classes = [RetrieveUpdateDestroyAPIKey]
+
+    @swagger_auto_schema(tags=["Products"])
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=["Products"])
+    def put(self, request, *args, **kwargs):
+        return super().put(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=["Products"])
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=["Products"])
+    def delete(self, request, *args, **kwargs):
+        return super().delete(request, *args, **kwargs)
