@@ -175,6 +175,9 @@ REST_FRAMEWORK = {
     ),
 }
 
+if not DEBUG:
+    REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = ('rest_framework.renderers.JSONRenderer',)
+
 API_KEY_CUSTOM_HEADER = "HTTP_X_API_KEY"
 
 CSRF_TRUSTED_ORIGINS = [

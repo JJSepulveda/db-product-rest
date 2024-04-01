@@ -1,6 +1,6 @@
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework import generics
+from rest_framework import generics, authentication, permissions
 from rest_framework.response import Response
 from rest_framework import filters
 from django_filters import AllValuesFilter, DateTimeFilter, NumberFilter, RangeFilter
@@ -148,6 +148,8 @@ class ApiRoot(generics.GenericAPIView):
     name = "api-root"
     pagination_class = None
     filter_backends = None
+    authentication_classes = [authentication.SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated] 
 
     @swagger_auto_schema(
         tags=["Info"],
@@ -183,6 +185,8 @@ class GetApiKey(generics.GenericAPIView):
     name = "show-api-key"
     pagination_class = None
     filter_backends = None
+    authentication_classes = [authentication.SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated] 
 
     @swagger_auto_schema(
         tags=["Info"],
@@ -219,7 +223,6 @@ class ProductListCreateV2(generics.ListCreateAPIView):
     filterset_fields = ("nombre",)
     search_fields = ("nombre", "codigo")
     ordering_fields = ("nombre", "created_at")
-    permission_classes = [PostHasAPIKey]
     filterset_class = ProductoFilter
 
     @swagger_auto_schema(tags=["Products"])
