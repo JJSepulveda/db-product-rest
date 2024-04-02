@@ -18,6 +18,8 @@ from product.models import Producto
 
 from .serializers import ProductoSerializer, ProductoSerializerV2
 
+from urllib.parse import quote
+
 APP_NAME = "product_api"
 
 

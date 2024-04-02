@@ -1,4 +1,4 @@
-from django.urls import include, path
+from django.urls import include, path, re_path
 from rest_framework import routers
 
 from . import views
@@ -15,8 +15,8 @@ urlpatterns = [
         views.ProductRetrieveUpdateDestroyV2.as_view(),
         name="product_detail_v2",
     ),
-    path(
-        "products/c/<str:codigo>/",
+    re_path(
+        r"^products/c/(?P<codigo>.+)/$",
         views.ProductRetrieveUpdateDestroyCodeV2.as_view(),
         name="product_detail_code_v2",
     ),
