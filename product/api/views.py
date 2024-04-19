@@ -16,9 +16,15 @@ from drf_yasg.utils import swagger_auto_schema
 
 from product.models import Producto
 
-from .serializers import ProductoSerializer, ProductoSerializerV2
+from .serializers import (
+    ProductoSerializer,
+    ProductoSerializerV2,
+    ProductoStockSerializer,
+)
 
 from urllib.parse import quote
+
+import base64
 
 APP_NAME = "product_api"
 
@@ -151,7 +157,7 @@ class ApiRoot(generics.GenericAPIView):
     pagination_class = None
     filter_backends = None
     authentication_classes = [authentication.SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated] 
+    permission_classes = [permissions.IsAuthenticated]
 
     @swagger_auto_schema(
         tags=["Info"],
@@ -188,7 +194,7 @@ class GetApiKey(generics.GenericAPIView):
     pagination_class = None
     filter_backends = None
     authentication_classes = [authentication.SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated] 
+    permission_classes = [permissions.IsAuthenticated]
 
     @swagger_auto_schema(
         tags=["Info"],
@@ -303,3 +309,21 @@ class ProductRetrieveUpdateDestroyCodeV2(generics.RetrieveUpdateDestroyAPIView):
     @swagger_auto_schema(tags=["Products"])
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
+
+
+class ProductStockView(APIView):
+    def get(self, request, *args, **kwargs):
+        ids = request.query_params.get("ids")
+
+        if not ids:
+            return Response({"error": "No se proporcionaron IDs"}, status=400)
+        try:
+            ids_list = [
+                base64.b64decode(codigo.encode("utf-8")).decode("utf-8") for codigo in ids.split(",")
+            ]
+        except (ValueError, UnicodeDecodeError) as e:
+            return Response({"error": "Invalid ID format"}, status=400)
+
+        elementos = Producto.objects.filter(codigo__in=ids_list)
+        serializer = ProductoStockSerializer(elementos, many=True)
+        return Response(serializer.data)

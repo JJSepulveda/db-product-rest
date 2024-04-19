@@ -20,4 +20,9 @@ urlpatterns = [
         views.ProductRetrieveUpdateDestroyCodeV2.as_view(),
         name="product_detail_code_v2",
     ),
+    path(
+        "products/bulk/", 
+        views.ProductStockView.as_view(), 
+        name="bulk_p"
+    ),
 ]

@@ -3,7 +3,7 @@ from rest_framework import routers
 
 from . import views
 
-app_name = views.APP_NAME
+app_name = "product_api"
 urlpatterns = [
     path(
         "products/",

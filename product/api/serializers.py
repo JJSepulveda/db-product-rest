@@ -68,3 +68,30 @@ class ProductoSerializerV2(serializers.ModelSerializer):
         ]
         warehouses_data = {field: getattr(obj, field) for field in warehouse_fields}
         return warehouses_data
+
+
+class ProductoStockSerializer(serializers.ModelSerializer):
+    warehouses = serializers.SerializerMethodField()
+    class Meta:
+        model = Producto
+        fields = [
+            "id",
+            "codigo",
+            "nombre",
+            "warehouses"
+        ]
+
+    def get_warehouses(self, obj):
+        warehouse_fields = [
+            "existencia",
+            "existenciaPiso",
+            "existenciaProd",
+            "existenciaTubos",
+            "existenciaTanques",
+            "existenciaDistr",
+            "existenciaMakita",
+            "existenciaStaRosa",
+            "existenciaTotal",
+        ]
+        warehouses_data = {field: getattr(obj, field) for field in warehouse_fields}
+        return warehouses_data
