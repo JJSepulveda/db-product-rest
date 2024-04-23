@@ -30,9 +30,19 @@
                     class="alert alert-success alert-dismissible fade show"
                     role="alert" 
                     x-show="isFinish"
-                    x-cloack
+                    x-cloak
                     x-transition.duration.500ms>
                     Se cargaron los nuevos elementos
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div
+                    class="alert alert-danger alert-dismissible fade show"
+                    role="alert" 
+                    x-show="isError"
+                    x-cloak
+                    x-transition.duration.500ms>
+                    Hubo un error
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
                 <div id="loading-element" x-cloak x-show="isLoading" x-transition.duration.500ms>
                     <i class="bx bx-loader-circle bx-spin"></i> Cargando...
@@ -157,6 +167,8 @@
             async loadData(){
                 this.isLoading = true;
                 this.counter = 0;
+                this.progress = 0;
+                this.dataAmount = 0;
                 this.notifications = [];
                 this.isError = false;
                 this.isFinish = false;
@@ -218,6 +230,7 @@
                         } catch (error) {
                             console.error('Error al cargar el archivo:', error);
                             self.isError = true;
+                            self.isLoading = false;
                             self.notifications.push(error)
                         }
                     }

@@ -135,7 +135,9 @@ def create_new_products_from_csv(products_code, data_frame):
     # Crear los productos existentes con los nuevos valores del DataFrame
     product_list = []
     for code in products_code:
-        row = data_frame[data_frame['codigo'] == code].iloc[0]
+        codigo_producto_typed = type(data_frame['codigo'].iloc[0])(code)
+        row = data_frame[data_frame['codigo'] == codigo_producto_typed].iloc[0]
+        # row = data_frame[data_frame['codigo'] == code].iloc[0]
         # Validar el tipo de dato antes de la asignación
         try:
             stock = try_convert(row, 'existencia', int)
@@ -191,7 +193,9 @@ def update_products(codigos_productos, data_frame):
     productos_existentes = Producto.objects.filter(codigo__in=codigos_productos)
     # Actualizar los productos existentes con los nuevos valores del DataFrame
     for producto_existente in productos_existentes:
-        row = data_frame[data_frame['codigo'] == producto_existente.codigo].iloc[0]
+        codigo_producto = producto_existente.codigo
+        codigo_producto_typed = type(data_frame['codigo'].iloc[0])(codigo_producto)
+        row = data_frame[data_frame['codigo'] == codigo_producto_typed].iloc[0]
         stock = try_convert(row, 'existencia', int)
         existencia = get_stock(stock)
         stocks = get_stocks(row)
