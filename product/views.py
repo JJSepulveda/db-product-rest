@@ -354,13 +354,16 @@ def load_data_api(request):
         # import pdb; pdb.set_trace()
         # Cargar datos del archivo CSV
         data_frame = pd.read_csv(archivo, na_values=['NaN', 'N/A', '', 'nan'])
+        # This declaration standardizes the data type to prevent discrepancies caused by using various types, thereby ensuring data integrity
+        existencia_cols = ['existenciaPiso', 'existenciaProd', 'existenciaTubos', 'existenciaTanques', 'existenciaDistr', 'existenciaMakita', 'existenciaStaRosa', 'existenciaTotal']
+        data_frame[existencia_cols] = data_frame[existencia_cols].astype(int)
         # data_frame.columns = data_frame.columns.str.lower()
 
         phase1_time = time.time() - start_time
         logging.info(f"Fase 1: {phase1_time} segundos")
 
         # Obtener códigos de productos del DataFrame que se usaran para cargar los productos existentes y actualizarlos
-        codigos_productos = data_frame['codigo'].tolist()
+        codigos_productos = data_frame['codigo'].tolist()   
         productos_existentes = update_products(codigos_productos, data_frame)
 
         phase2_time = time.time() - start_time
