@@ -78,6 +78,7 @@ class ProductoStockSerializer(serializers.ModelSerializer):
             "id",
             "codigo",
             "nombre",
+            "onlinePrice",
             "warehouses"
         ]
 

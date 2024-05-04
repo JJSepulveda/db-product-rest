@@ -13,6 +13,7 @@ class Producto(models.Model):
     ptje1 = models.IntegerField(blank=True, null=True)
     ptjeReal = models.IntegerField(blank=True, null=True)
     precioCalculado = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    onlinePrice = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     maximo = models.IntegerField(blank=True, null=True)
     minimo = models.IntegerField(blank=True, null=True)
     estatus = models.IntegerField(blank=True, null=True)

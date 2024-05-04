@@ -14,6 +14,8 @@ from .models import Producto
 import logging
 # Create your views here.
 
+# CONSTS
+ONLINE_PRICE = "precioTiendaLinea"
 
 @login_required
 def index(request):
@@ -157,6 +159,7 @@ def create_new_products_from_csv(products_code, data_frame):
                 ptje1=try_convert(row, 'ptje1', Decimal),
                 ptjeReal=try_convert(row, 'ptjeReal', Decimal),
                 precioCalculado=try_convert(row, 'precioCalculado', Decimal),
+                onlinePrice=try_convert(row, ONLINE_PRICE, Decimal),
                 maximo=try_convert(row, 'maximo', int),
                 minimo=try_convert(row, 'minimo', int),
                 estatus=try_convert(row, 'estatus', int),
@@ -211,6 +214,7 @@ def update_products(codigos_productos, data_frame):
         producto_existente.ptje1=try_convert(row, 'ptje1', Decimal)
         producto_existente.ptjeReal=try_convert(row, 'ptjeReal', Decimal)
         producto_existente.precioCalculado=try_convert(row, 'precioCalculado', Decimal)
+        producto_existente.onlinePrice=try_convert(row, ONLINE_PRICE, Decimal)
         producto_existente.maximo=try_convert(row, 'maximo', int)
         producto_existente.minimo=try_convert(row, 'minimo', int)
         producto_existente.estatus=try_convert(row, 'estatus', int)
@@ -296,7 +300,7 @@ def load_data_v2(request):
                     "nombreProveedor", "unidad", "codigoSat", "nomCodSat",
                     "unidadSat", "nomUniSat", "existencia", "existenciaPiso", "existenciaProd", 
                     "existenciaTubos", "existenciaTanques", "existenciaDistr", "existenciaMakita", 
-                    "existenciaStaRosa", "existenciaTotal"
+                    "existenciaStaRosa", "existenciaTotal", "onlinePrice"
                 ], batch_size=1000)
             except IntegrityError:
                 logging.error("Error al actualizar los productos:")
@@ -335,9 +339,11 @@ def load_data_v3(request):
     }
     return render(request, "product/load_data_api.html", context=context)
 
-
-
 from django.http import JsonResponse
+
+def clean_warehoused(data_frame, stocks_cols):
+    for col in stocks_cols:
+        data_frame[col] = pd.to_numeric(data_frame[col], errors='coerce').fillna(0).astype(int)
 
 @login_required
 def load_data_api(request):
@@ -356,7 +362,8 @@ def load_data_api(request):
         data_frame = pd.read_csv(archivo, na_values=['NaN', 'N/A', '', 'nan'])
         # This declaration standardizes the data type to prevent discrepancies caused by using various types, thereby ensuring data integrity
         existencia_cols = ['existenciaPiso', 'existenciaProd', 'existenciaTubos', 'existenciaTanques', 'existenciaDistr', 'existenciaMakita', 'existenciaStaRosa', 'existenciaTotal']
-        data_frame[existencia_cols] = data_frame[existencia_cols].astype(int)
+        
+        clean_warehoused(data_frame, existencia_cols)
         # data_frame.columns = data_frame.columns.str.lower()
 
         phase1_time = time.time() - start_time
@@ -397,7 +404,7 @@ def load_data_api(request):
                     "nombreProveedor", "unidad", "codigoSat", "nomCodSat",
                     "unidadSat", "nomUniSat", "existencia", "existenciaPiso", "existenciaProd", 
                     "existenciaTubos", "existenciaTanques", "existenciaDistr", "existenciaMakita", 
-                    "existenciaStaRosa", "existenciaTotal"
+                    "existenciaStaRosa", "existenciaTotal", "onlinePrice"
                 ], batch_size=1000)
             except IntegrityError:
                 logging.error("Error al actualizar los productos:")
