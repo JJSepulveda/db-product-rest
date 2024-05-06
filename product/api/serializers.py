@@ -18,6 +18,7 @@ class ProductoSerializer(serializers.ModelSerializer):
             "ptje1",
             "ptjeReal",
             "precioCalculado",
+            "onlinePrice",
             "maximo",
             "minimo",
             "estatus",
@@ -79,6 +80,7 @@ class ProductoStockSerializer(serializers.ModelSerializer):
             "codigo",
             "nombre",
             "onlinePrice",
+            "precioCalculado",
             "warehouses"
         ]
 
